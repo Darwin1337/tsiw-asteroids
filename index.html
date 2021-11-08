@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Projeto da cadeira Computação Gráfica de 2º ano - Tecnologias e Sistemas de Informação para a Web 2021/2022">
+    <meta name="author" content="Gonçalo Gama, Diogo Borges e Diogo Oliveira">
     <title>Asteróides | CG</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="icon" href="img/icon.png">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 
 <body>
@@ -19,112 +22,112 @@
       <li><button id="options" type="button" name="button">Opções</button></li>
     </ul>
   </div>
+
   <canvas></canvas>
 
   <script>
-      const canvas = document.querySelector("canvas");
-      canvas.width = window.innerWidth - 20;
-      canvas.height = window.innerHeight - 20;
-      const ctx = canvas.getContext("2d");
-      const W = canvas.width;
-      const H = canvas.height;
-      let m = new Array();
+    const canvas = document.querySelector("canvas");
+    canvas.width = window.innerWidth - 20;
+    canvas.height = window.innerHeight - 20;
+    const ctx = canvas.getContext("2d");
+    const W = canvas.width;
+    const H = canvas.height;
+    let m = new Array();
 
-      // Since there has to be an intro to the game, we do not want to start it right away
-      let hasTheGameStarted = false;
+    // Since there has to be an intro to the game, we do not want to start it right away
+    let hasTheGameStarted = false;
 
-      class Asteroid {
-          constructor(x, y, a, r) {
-              // Initial X position
-              this.x = x;
-              // Initial Y position
-              this.y = y;
+    class Asteroid {
+      constructor(x, y, a, r) {
+          // Initial X position
+          this.x = x;
+          // Initial Y position
+          this.y = y;
 
-              // (constant) horizontal displacement (velocity): d is a direction angle
-              this.dX = Math.random() * 2;
-              // (constant) vertical displacement (velocity): d is a direction angle
-              this.dY = Math.random() * 2;
+          // (constant) horizontal displacement (velocity): d is a direction angle
+          this.dX = Math.random() * 2;
+          // (constant) vertical displacement (velocity): d is a direction angle
+          this.dY = Math.random() * 2;
 
-              // Angles for each line
-              this.a = a;
-              // Circle radius
-              this.r = r;
-          }
-
-          draw() {
-            ctx.beginPath();
-            for (var i = 0; i < 6; i++) {
-                ctx.lineTo(this.x + this.r * Math.cos(this.a * i), this.y + this.r * Math.sin(this.a * i));
-            }
-            ctx.fillStyle = "white";
-            ctx.fill();
-          }
-
-          update() {
-            // update horizontal position
-            this.x += this.dX;
-            this.y += this.dY; // update vertical position
-          }
+          // Angles for each line
+          this.a = a;
+          // Circle radius
+          this.r = r;
       }
 
-      function render() {
-        // Draw & update
-        ctx.clearRect(0, 0, W, H)
-
-        // Check canvas vertical collisions
-        if (this.x < this.r || this.x > W - this.r) {
-            alert("toquei")
-            this.dX = -this.dX;
+      draw() {
+        ctx.beginPath();
+        for (var i = 0; i < 6; i++) {
+            ctx.lineTo(this.x + this.r * Math.cos(this.a * i), this.y + this.r * Math.sin(this.a * i));
         }
-
-        this.dX = -this.dX;
-
-        if (this.y >= H + this.r) {
-          this.y=-this.r;
-        }
-
-        m.forEach(meteorito => {
-          meteorito.draw();
-          meteorito.update();
-        });
-
-        window.requestAnimationFrame(render);
+        ctx.fillStyle = "white";
+        ctx.fill();
       }
 
-      function createAsteroids(a) {
-        // a = quantity of asteroids to be made
+      update() {
+        // update horizontal position
+        this.x += this.dX;
+        this.y += this.dY; // update vertical position
+      }
+    }
 
-        for (let i = 0; i < a; i++) {
-            const a = 2 * Math.PI / 6;
-            const r = 70;
-            const xInit = 20 + Math.random() * (W - 2 * 20);
-            const yInit = 20 + Math.random() * (H - 2 * 20);
-            m.push(new Asteroid(xInit, yInit, a, r));
-        }
+    function render() {
+      // Draw & update
+      ctx.clearRect(0, 0, W, H)
+
+      // Check canvas vertical collisions
+      if (this.x < this.r || this.x > W - this.r) {
+          alert("toquei")
+          this.dX = -this.dX;
       }
 
-      // We only want to create asteroids and render when the game actually starts and when the current round is over
-      setTimeout(function() {
-        document.querySelector(".intro").style.display = "none";
-        document.querySelector(".menu").style.display = "flex";
-      }, 1000);
+      this.dX = -this.dX;
 
-      document.querySelector("#start").addEventListener("click", function(event) {
-        startGame();
+      if (this.y >= H + this.r) {
+        this.y=-this.r;
+      }
+
+      m.forEach(meteorito => {
+        meteorito.draw();
+        meteorito.update();
       });
 
-      function startGame() {
-        // Show the canvas
-        document.querySelector(".menu").style.display = "none";
-        canvas.style.display = "block";
+      window.requestAnimationFrame(render);
+    }
 
-        createAsteroids(5);
+    function createAsteroids(a) {
+      // a = quantity of asteroids to be made
 
-        // Start the animation
-        render();
-        console.log("The game has started");
+      for (let i = 0; i < a; i++) {
+          const a = 2 * Math.PI / 6;
+          const r = 70;
+          const xInit = 20 + Math.random() * (W - 2 * 20);
+          const yInit = 20 + Math.random() * (H - 2 * 20);
+          m.push(new Asteroid(xInit, yInit, a, r));
       }
+    }
 
-    </script>
+    // We only want to create asteroids and render when the game actually starts or when the current round is over
+    setTimeout(function() {
+      document.querySelector(".intro").style.display = "none";
+      document.querySelector(".menu").style.display = "flex";
+    }, 1000);
+
+    document.querySelector("#start").addEventListener("click", function(event) {
+      startGame();
+    });
+
+    function startGame() {
+      // Show the canvas
+      document.querySelector(".menu").style.display = "none";
+      canvas.style.display = "block";
+
+      createAsteroids(5);
+
+      // Start the animation
+      render();
+      console.log("The game has started");
+    }
+  </script>
 </body>
 </html>
