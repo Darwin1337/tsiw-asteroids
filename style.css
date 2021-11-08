@@ -1,0 +1,52 @@
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.intro {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: black;
+}
+
+.intro h3 {
+  color: white;
+  font-size: 3.5em;
+}
+
+.intro p {
+  color: white;
+}
+
+canvas {
+  display: none;
+  background-color: black;
+  width: 100%;
+  height: 100%;
+}
+
+.menu {
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu ul {
+  margin: 0;
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.menu ul li {
+  padding: 15px;
+}
