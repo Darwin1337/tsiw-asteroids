@@ -1,6 +1,6 @@
 # tsiw-asteroids
 
-Repositório do projeto **Asteroids** de Computação Gráfica, cadeira de 1.º semestre do curso Tecnologias e Sistemas de Informação para a Web da Escola Superior de Media Artes e Design - Instituto Politécnico do Porto.
+Repositório do projeto **Asteroids** de Computação Gráfica, cadeira de 2.º ano do curso Tecnologias e Sistemas de Informação para a Web da Escola Superior de Media Artes e Design - Instituto Politécnico do Porto.
 
 Desenvolvido por:
 
