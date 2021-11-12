@@ -33,10 +33,22 @@
     const W = canvas.width;
     const H = canvas.height;
     let m = new Array();
+    let s;
+    let b=new Array();
+    let upperKey=false;
+    let rightKey=false;
+    let leftKey=false;
+    let lowerkey=false;
+    let spaceKey=false;
+    let y=200;
+    let x=200;
+    let timeout;
+    let v=1;
 
     // Since there has to be an intro to the game, we do not want to start it right away
     let hasTheGameStarted = false;
 
+    //calsses
     class Asteroid {
       constructor(x, y, a, r) {
           // Initial X position
@@ -68,12 +80,40 @@
         ctx.stroke();
         ctx.fill()
 
+      }
+
+      update() {
+        // update horizontal position
+        this.x += this.dX;
+        this.y += this.dY; // update vertical position
+
+      }
+    }
+    
+    class Nave{
+      constructor(x, y, a, r) {
+        // Initial X position
+        this.x = x;
+        // Initial Y position
+        this.y = y;
+
+        // (constant) horizontal displacement (velocity): d is a direction angle
+        this.dX = Math.random() * 2;
+        // (constant) vertical displacement (velocity): d is a direction angle
+        this.dY = Math.random() * 2;
+
+        // Angles for each line
+        this.a = a;
+        // Circle radius
+        this.r = r;
+      }
+      draw() {
         //nave com fogo
         ctx.beginPath()
-        ctx.moveTo(200,200)
-        ctx.lineTo(185,235)
-        ctx.lineTo(200,220)
-        ctx.lineTo(215,235)
+        ctx.moveTo(this.x,this.y)
+        ctx.lineTo(this.x-15,this.y+35)
+        ctx.lineTo(this.x,this.y+20)
+        ctx.lineTo(this.x+15,this.y+35)
         ctx.closePath()
         ctx.globalAlpha=0.5;
         ctx.fillStyle='lightblue'
@@ -82,46 +122,120 @@
         ctx.fill()
 
         ctx.beginPath()
-        ctx.moveTo(195,225)
-        ctx.lineTo(200,240)
-        ctx.lineTo(205,225)
+        ctx.moveTo(this.x-5,this.y+25)
+        ctx.lineTo(this.x,this.y+40)
+        ctx.lineTo(this.x+5,this.y+25)
         ctx.globalAlpha=0.3;
         ctx.fillStyle='orange'
         ctx.strokeStyle='white'
         ctx.stroke();
         ctx.fill()
       }
-
-      update() {
-        // update horizontal position
-        this.x += this.dX;
-        this.y += this.dY; // update vertical position
+    }
+    
+    class Balas{
+      constructor(x, y, r) {
+        this.x=x;
+        this.y=y;
+        this.r=r;
+      }
+      draw(){
+        ctx.beginPath();
+        ctx.arc(this.x, this.y,this.r,0,2*Math.PI);
+        ctx.fillStyle='white'
+        ctx.globalAlpha=1;
+        ctx.fill();
       }
     }
-
+    //eventos
+    document.onkeydown = function (e) {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      switch (e.key) {
+          case 'ArrowUp':
+              upperKey = true;
+              break;
+          case 'ArrowDown':
+              lowerkey=true;
+              break;
+          case 'ArrowLeft':
+              leftKey=true;
+              break;
+          case 'ArrowRight': 
+              rightKey=true;
+              break;
+          case 'x':
+              spaceKey=true;
+              break;
+      }
+    };
+    document.onkeyup = function (e) {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      console.log(e.key)
+      switch (e.key) {
+          case 'ArrowUp':
+              upperKey = false;
+              
+              break;
+          case 'ArrowDown':
+              lowerkey=false;
+              
+              break;
+          case 'ArrowLeft':
+              leftKey=false;
+              
+              break;
+          case 'ArrowRight': 
+              rightKey=false;
+              break;
+          case 'x':
+              spaceKey=false;
+              break;
+      }
+    };
+    document.querySelector("#start").addEventListener("click", function(event) {
+      startGame();
+    });
+    
     function render() {
+      //Movimento nave
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      if(upperKey){
+          s.y-=v;
+      }
+      if(lowerkey){
+        
+          s.y+=1;
+      }
+      if(leftKey){
+
+          s.x-=1;
+      }
+      if(rightKey){
+          
+          s.x+=1;
+      }
+      if(spaceKey){
+          createBullet()
+      }
       // Draw & update
-      ctx.clearRect(0, 0, W, H)
 
-      // Check canvas vertical collisions
-      if (this.x < this.r || this.x > W - this.r) {
-          alert("toquei")
-          this.dX = -this.dX;
-      }
-
-      this.dX = -this.dX;
-
-      if (this.y >= H + this.r) {
-        this.y=-this.r;
-      }
-
+      //Movimento do asteroide
+      
+      //desenhar meteorito
       m.forEach(meteorito => {
         meteorito.draw();
         meteorito.update();
       });
+      //desenhar nave
+      s.draw();
+      b.forEach(bullet => {
+        bullet.draw();
+        
+      });
+      
       window.requestAnimationFrame(render);
     }
-
+    //Criar asteroide
     function createAsteroids(a) {
       // a = quantity of asteroids to be made
 
@@ -133,16 +247,30 @@
           m.push(new Asteroid(xInit, yInit, a, r));
       }
     }
+    //Ciar nave
+    function crateShip() {
+      // a = quantity of asteroids to be made
+      
+          const a = 2 * Math.PI / 6;
+          const r = 70;
+          const xInit = W/2;
+          const yInit = H/2;
+          s=new Nave(xInit, yInit, a, r);
+      
+    }
 
+    function createBullet(){
+      const r = 4;
+      const xInit = W/2;
+      const yInit = H/2;
+      b.push(new Balas(xInit, yInit, r));
+    }
     // We only want to create asteroids and render when the game actually starts or when the current round is over
     setTimeout(function() {
       document.querySelector(".intro").style.display = "none";
       document.querySelector(".menu").style.display = "flex";
-    }, 1000);
-
-    document.querySelector("#start").addEventListener("click", function(event) {
       startGame();
-    });
+    }, 1);
 
     function startGame() {
       // Show the canvas
@@ -150,6 +278,7 @@
       canvas.style.display = "block";
 
       createAsteroids(5);
+      crateShip();
 
       // Start the animation
       render();
