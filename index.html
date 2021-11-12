@@ -56,12 +56,40 @@
       }
 
       draw() {
+        //Asteroides
         ctx.beginPath();
-        for (var i = 0; i < 6; i++) {
+        for (var i = 0; i <= 6; i++) {
             ctx.lineTo(this.x + this.r * Math.cos(this.a * i), this.y + this.r * Math.sin(this.a * i));
         }
-        ctx.fillStyle = "white";
-        ctx.fill();
+        ctx.globalAlpha=0.5;
+        ctx.fillStyle='gray'
+        ctx.lineWidth = 3;
+        ctx.strokeStyle='white'
+        ctx.stroke();
+        ctx.fill()
+
+        //nave com fogo
+        ctx.beginPath()
+        ctx.moveTo(200,200)
+        ctx.lineTo(185,235)
+        ctx.lineTo(200,220)
+        ctx.lineTo(215,235)
+        ctx.closePath()
+        ctx.globalAlpha=0.5;
+        ctx.fillStyle='lightblue'
+        ctx.strokeStyle='white'
+        ctx.stroke();
+        ctx.fill()
+
+        ctx.beginPath()
+        ctx.moveTo(195,225)
+        ctx.lineTo(200,240)
+        ctx.lineTo(205,225)
+        ctx.globalAlpha=0.3;
+        ctx.fillStyle='orange'
+        ctx.strokeStyle='white'
+        ctx.stroke();
+        ctx.fill()
       }
 
       update() {
