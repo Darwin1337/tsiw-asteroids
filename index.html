@@ -89,48 +89,32 @@
 
       }
     }
-    
-    class Nave{
-      constructor(x, y, a, r) {
+    class Nave {
+      constructor(x, y) {
         // Initial X position
         this.x = x;
         // Initial Y position
         this.y = y;
+        
+        this.width = 50;
+        this.height = 50;
 
-        // (constant) horizontal displacement (velocity): d is a direction angle
-        this.dX = Math.random() * 2;
-        // (constant) vertical displacement (velocity): d is a direction angle
-        this.dY = Math.random() * 2;
-
-        // Angles for each line
-        this.a = a;
-        // Circle radius
-        this.r = r;
+        // // (constant) horizontal displacement (velocity): d is a direction angle
+        // this.dX = Math.random() * 2;
+        // // (constant) vertical displacement (velocity): d is a direction angle
+        // this.dY = Math.random() * 2;
       }
+
       draw() {
-        //nave com fogo
-        ctx.beginPath()
-        ctx.moveTo(this.x,this.y)
-        ctx.lineTo(this.x-15,this.y+35)
-        ctx.lineTo(this.x,this.y+20)
-        ctx.lineTo(this.x+15,this.y+35)
-        ctx.closePath()
-        ctx.globalAlpha=0.5;
-        ctx.fillStyle='lightblue'
-        ctx.strokeStyle='white'
-        ctx.stroke();
-        ctx.fill()
-
-        ctx.beginPath()
-        ctx.moveTo(this.x-5,this.y+25)
-        ctx.lineTo(this.x,this.y+40)
-        ctx.lineTo(this.x+5,this.y+25)
-        ctx.globalAlpha=0.3;
-        ctx.fillStyle='orange'
-        ctx.strokeStyle='white'
-        ctx.stroke();
-        ctx.fill()
+        
+        const image = new Image();
+        image.src = "img/spaceship.svg";
+        ctx.drawImage(image, this.x, this.y, this.width, this.height);
       }
+      // update(){
+      //   x=this.x;
+      //   y=this.y;
+      // }
     }
     
     class Balas{
@@ -145,6 +129,14 @@
         ctx.fillStyle='white'
         ctx.globalAlpha=1;
         ctx.fill();
+      }
+      update(){
+        for(let i=0;i<b.length;i++){
+          if(b[i].y<0-this.r){
+            b.splice(i,1)
+          }
+        }
+        this.y-=3;
       }
     }
     //eventos
@@ -163,14 +155,16 @@
           case 'ArrowRight': 
               rightKey=true;
               break;
-          case 'x':
-              spaceKey=true;
-              break;
       }
+      if(e.keyCode==32){
+        createBullet();
+        
+      }
+
     };
+    
     document.onkeyup = function (e) {
       ctx.clearRect(0,0,canvas.width,canvas.height);
-      console.log(e.key)
       switch (e.key) {
           case 'ArrowUp':
               upperKey = false;
@@ -187,36 +181,31 @@
           case 'ArrowRight': 
               rightKey=false;
               break;
-          case 'x':
-              spaceKey=false;
-              break;
       }
+      
     };
+    
     document.querySelector("#start").addEventListener("click", function(event) {
       startGame();
     });
     
     function render() {
+      
       //Movimento nave
       ctx.clearRect(0,0,canvas.width,canvas.height);
       if(upperKey){
           s.y-=v;
       }
       if(lowerkey){
-        
           s.y+=1;
       }
       if(leftKey){
-
           s.x-=1;
       }
       if(rightKey){
-          
           s.x+=1;
       }
-      if(spaceKey){
-          createBullet()
-      }
+      
       // Draw & update
 
       //Movimento do asteroide
@@ -228,9 +217,11 @@
       });
       //desenhar nave
       s.draw();
+      
+      //desenhar balas
       b.forEach(bullet => {
         bullet.draw();
-        
+        bullet.update();
       });
       
       window.requestAnimationFrame(render);
@@ -251,18 +242,17 @@
     function crateShip() {
       // a = quantity of asteroids to be made
       
-          const a = 2 * Math.PI / 6;
-          const r = 70;
+          
           const xInit = W/2;
           const yInit = H/2;
-          s=new Nave(xInit, yInit, a, r);
+          s=new Nave(xInit, yInit);
       
     }
 
     function createBullet(){
       const r = 4;
-      const xInit = W/2;
-      const yInit = H/2;
+      const xInit = x;
+      const yInit = y;
       b.push(new Balas(xInit, yInit, r));
     }
     // We only want to create asteroids and render when the game actually starts or when the current round is over
