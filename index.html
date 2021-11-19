@@ -32,243 +32,247 @@
     const ctx = canvas.getContext("2d");
     const W = canvas.width;
     const H = canvas.height;
-    let m = new Array();
-    let s;
-    let b=new Array();
-    let upperKey=false;
-    let rightKey=false;
-    let leftKey=false;
-    let lowerkey=false;
-    let spaceKey=false;
-    let y=200;
-    let x=200;
-    let timeout;
-    let v=1;
 
-    // Since there has to be an intro to the game, we do not want to start it right away
-    let hasTheGameStarted = false;
+    // TO DO
+    // Verificar se o asteróide não nasce em cima da nave - createAsteroid()
 
-    //calsses
+    // Array que irá ficar com as teclas pressionadas
+    let keys = new Array();
+
+    // Variável que irá conter o objeto da nave
+    let spaceship;
+
+    // Array que irá conter todas as balas disparadas
+    let bullets = new Array();
+
+    // Array que irá conter todos os asteróides ativos
+    let arrayAsteroids = new Array();
+
+    // Variável que irá ditar se o utilizador pode ou não disparar
+    let isAbleToShoot = true;
+
     class Asteroid {
-      constructor(x, y, a, r) {
-          // Initial X position
+      constructor(x, y, width, height) {
+          // Posição inicial X
           this.x = x;
-          // Initial Y position
+
+          // Posição inicial Y
           this.y = y;
 
-          // (constant) horizontal displacement (velocity): d is a direction angle
-          this.dX = Math.random() * 2;
-          // (constant) vertical displacement (velocity): d is a direction angle
-          this.dY = Math.random() * 2;
+          // Largura do asteróide
+          this.width = width;
 
-          // Angles for each line
-          this.a = a;
-          // Circle radius
-          this.r = r;
+          // Altura do asteróide
+          this.height = height;
+
+          // Ângulo aleatório
+          this.angle = (Math.random() * 360) * Math.PI / 180;
+
+          // Movimento no eixo X
+          this.dX = Math.random() < 0.5 ? -2 : 2;
+
+          // Movimento no eixo Y
+          this.dY = Math.random() < 0.5 ? -2 : 2;
       }
 
       draw() {
-        //Asteroides
-        ctx.beginPath();
-        for (var i = 0; i <= 6; i++) {
-            ctx.lineTo(this.x + this.r * Math.cos(this.a * i), this.y + this.r * Math.sin(this.a * i));
-        }
-        ctx.globalAlpha=0.5;
-        ctx.fillStyle='gray'
-        ctx.lineWidth = 3;
-        ctx.strokeStyle='white'
-        ctx.stroke();
-        ctx.fill()
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+        const image = new Image();
+        image.src = "img/asteroid.svg"
+        ctx.drawImage(image, 0, 0, this.width, this.height);
+        ctx.restore();
+      }
 
+      update() { 
+        if (this.x + this.width > W || this.x <= 0) {
+          this.dX = -this.dX;
+        }
+
+        if (this.y + this.height > H || this.y <= 0) {
+          this.dY = -this.dY;
+        }
+
+        // // Atualiza a posição horizontal
+        this.x += this.dX;
+
+        // // Atualiza a posição vertical
+        this.y += this.dY;
+      }
+    }
+    
+    class Spaceship {
+      constructor(x, y) {
+        // Posição inicial X
+        this.x = x;
+
+        // Posição inicial Y
+        this.y = y;
+
+        // Largura da nave
+        this.width = 50;
+
+        // Altura da nave
+        this.height = 50;
+
+        // Velocidade da nave
+        this.vel = 3;
+
+        // Ângulo da nave
+        this.angle = 0;
+
+        // Propriedade para poder ser possível alterar a imagem quando a nave está em movimento
+        this.imgsrc = "img/spaceship.svg";
+      }
+
+      draw() {
+        const image = new Image();
+        image.src = this.imgsrc;
+        ctx.save();
+        ctx.translate(this.x + (this.width / 2), this.y + (this.height / 2));
+        ctx.rotate(this.angle);
+        ctx.drawImage(image, 0 - (this.width / 2), 0 - (this.height / 2), this.width, this.height);
+        ctx.restore();
+      }
+    }
+    
+    class Bullet {
+      constructor(x, y, r) {
+        this.x = x;
+        this.y = y;
+        this.r = r;
+        this.vel = 3;
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI);
+        ctx.fillStyle = "white";
+        ctx.globalAlpha = 1;
+        ctx.fill();
       }
 
       update() {
-        // update horizontal position
-        this.x += this.dX;
-        this.y += this.dY; // update vertical position
-
-      }
-    }
-    class Nave {
-      constructor(x, y) {
-        // Initial X position
-        this.x = x;
-        // Initial Y position
-        this.y = y;
-        
-        this.width = 50;
-        this.height = 50;
-
-        // // (constant) horizontal displacement (velocity): d is a direction angle
-        // this.dX = Math.random() * 2;
-        // // (constant) vertical displacement (velocity): d is a direction angle
-        // this.dY = Math.random() * 2;
-      }
-
-      draw() {
-        
-        const image = new Image();
-        image.src = "img/spaceship.svg";
-        ctx.drawImage(image, this.x, this.y, this.width, this.height);
-      }
-      // update(){
-      //   x=this.x;
-      //   y=this.y;
-      // }
-    }
-    
-    class Balas{
-      constructor(x, y, r) {
-        this.x=x;
-        this.y=y;
-        this.r=r;
-      }
-      draw(){
-        ctx.beginPath();
-        ctx.arc(this.x, this.y,this.r,0,2*Math.PI);
-        ctx.fillStyle='white'
-        ctx.globalAlpha=1;
-        ctx.fill();
-      }
-      update(){
-        for(let i=0;i<b.length;i++){
-          if(b[i].y<0-this.r){
-            b.splice(i,1)
+        for(let i = 0; i < bullets.length; i++) {
+          if (bullets[i].y < 0 - this.r) {
+            bullets.splice(i, 1);
           }
         }
-        this.y-=3;
+        this.y -= this.vel;
       }
     }
-    //eventos
-    document.onkeydown = function (e) {
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      switch (e.key) {
-          case 'ArrowUp':
-              upperKey = true;
-              break;
-          case 'ArrowDown':
-              lowerkey=true;
-              break;
-          case 'ArrowLeft':
-              leftKey=true;
-              break;
-          case 'ArrowRight': 
-              rightKey=true;
-              break;
-      }
-      if(e.keyCode==32){
-        createBullet();
-        
-      }
-
-    };
     
-    document.onkeyup = function (e) {
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      switch (e.key) {
-          case 'ArrowUp':
-              upperKey = false;
-              
-              break;
-          case 'ArrowDown':
-              lowerkey=false;
-              
-              break;
-          case 'ArrowLeft':
-              leftKey=false;
-              
-              break;
-          case 'ArrowRight': 
-              rightKey=false;
-              break;
-      }
-      
-    };
+    window.addEventListener("keydown", event => {
+      // Limpar o ecrã porque...
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      keys[event.key] = true;
+      event.preventDefault();
+    });
+
+    window.addEventListener("keyup", event => {
+      // Limpar o ecrã porque...
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      keys[event.key] = false;
+    });
     
     document.querySelector("#start").addEventListener("click", function(event) {
       startGame();
     });
     
-    function render() {
-      
-      //Movimento nave
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      if(upperKey){
-          s.y-=v;
-      }
-      if(lowerkey){
-          s.y+=1;
-      }
-      if(leftKey){
-          s.x-=1;
-      }
-      if(rightKey){
-          s.x+=1;
-      }
-      
-      // Draw & update
+    function handleSpaceshipControls() {
+      if (keys["ArrowUp"]) {
+        if (spaceship.imgsrc != "img/spaceship_fire.svg") {
+          spaceship.imgsrc = "img/spaceship_fire.svg";
+        }
 
-      //Movimento do asteroide
-      
-      //desenhar meteorito
-      m.forEach(meteorito => {
-        meteorito.draw();
-        meteorito.update();
+        let dX = Math.cos(spaceship.angle) * spaceship.vel;
+        let dY = Math.sin(spaceship.angle) * spaceship.vel;
+        spaceship.x += dX;
+        spaceship.y -= dY;
+        
+      } else {
+        if (spaceship.imgsrc != "img/spaceship.svg") {
+          spaceship.imgsrc = "img/spaceship.svg";
+        }
+      }
+
+      if (keys["ArrowLeft"]) {
+        spaceship.angle -= 0.05;
+      }
+
+      if (keys["ArrowRight"]) {
+        spaceship.angle += 0.05;
+      }
+
+      if (keys[" "]) { // Lidar com a tecla de espaço
+        if (isAbleToShoot) {
+          createBullet();
+          isAbleToShoot = false;
+        }
+      } else {
+        isAbleToShoot = true;
+      }
+    }
+
+    function render() {
+      // Limpar o ecrã todas as vezes que o render for executado
+      ctx.clearRect(0, 0, W, H);
+
+      // Mover a nave quando as setas forem pressionadas
+      handleSpaceshipControls();
+
+      // Desenhar os asteróides
+      arrayAsteroids.forEach(asteroid => {
+        asteroid.draw();
+        asteroid.update();
       });
-      //desenhar nave
-      s.draw();
       
-      //desenhar balas
-      b.forEach(bullet => {
+      // Desenhar nave
+      spaceship.draw();
+
+      // Desenhar balas
+      bullets.forEach(bullet => {
         bullet.draw();
         bullet.update();
       });
       
       window.requestAnimationFrame(render);
     }
-    //Criar asteroide
-    function createAsteroids(a) {
-      // a = quantity of asteroids to be made
 
-      for (let i = 0; i < a; i++) {
-          const a = 2 * Math.PI / 6;
-          const r = 70;
-          const xInit = 20 + Math.random() * (W - 2 * 20);
-          const yInit = 20 + Math.random() * (H - 2 * 20);
-          m.push(new Asteroid(xInit, yInit, a, r));
+    function createShip() {
+      spaceship = new Spaceship(W / 2, H / 2);
+    }
+
+    function createBullet() {
+      bullets.push(new Bullet(spaceship.x + (spaceship.width / 2), spaceship.y, 4));
+    }
+
+    function createAsteroid(num) {
+      for (let i = 0; i < num; i++) {
+        // Verificar se o asteróide não nasce em cima da nave
+        arrayAsteroids.push(new Asteroid(Math.random() * (W - 55), Math.random() * (H - 50), 55, 50));
       }
     }
-    //Ciar nave
-    function crateShip() {
-      // a = quantity of asteroids to be made
-      
-          
-          const xInit = W/2;
-          const yInit = H/2;
-          s=new Nave(xInit, yInit);
-      
-    }
 
-    function createBullet(){
-      const r = 4;
-      const xInit = x;
-      const yInit = y;
-      b.push(new Balas(xInit, yInit, r));
-    }
-    // We only want to create asteroids and render when the game actually starts or when the current round is over
     setTimeout(function() {
       document.querySelector(".intro").style.display = "none";
       document.querySelector(".menu").style.display = "flex";
       startGame();
     }, 1);
-
+    
     function startGame() {
       // Show the canvas
       document.querySelector(".menu").style.display = "none";
       canvas.style.display = "block";
 
-      createAsteroids(5);
-      crateShip();
+      // Desenhar nave
+      createShip();
+
+      // Desenhar asteróide
+      createAsteroid(10);
 
       // Start the animation
       render();
