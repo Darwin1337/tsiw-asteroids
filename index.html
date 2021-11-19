@@ -16,14 +16,15 @@
     <h3>Asteróides</h3>
   </div>
 
-  <div class="menu">
+  <nav class="menu" hidden>
     <ul>
-      <li><button id="start" type="button" name="button">Jogar</button></li>
-      <li><button id="options" type="button" name="button">Opções</button></li>
+      <li><span id="start">PLAY</span></li>
+      <li><span id="options">LEADERBOARD</span></li>
+      <li><span id="quit">QUIT</span></li>
     </ul>
-  </div>
+  </nav>
 
-  <canvas></canvas>
+  <canvas id="responsive-canvas"></canvas>
 
   <script>
     const canvas = document.querySelector("canvas");
@@ -33,6 +34,8 @@
     const W = canvas.width;
     const H = canvas.height;
     let m = new Array();
+
+    
 
     // Since there has to be an intro to the game, we do not want to start it right away
     let hasTheGameStarted = false;
@@ -136,6 +139,7 @@
 
     // We only want to create asteroids and render when the game actually starts or when the current round is over
     setTimeout(function() {
+      document.querySelector(".menu").style.display = "none";
       document.querySelector(".intro").style.display = "none";
       document.querySelector(".menu").style.display = "flex";
     }, 1000);
@@ -155,6 +159,16 @@
       render();
       console.log("The game has started");
     }
+
+    document.querySelector("#quit").addEventListener("click", function(event) {
+      window.close();
+    });
+
+    window.addEventListener('resize', function(event){
+      canvas.width = window.innerWidth - 20;
+      canvas.height = window.innerHeight - 20;
+      console.log("resized")
+});
   </script>
 </body>
 </html>
