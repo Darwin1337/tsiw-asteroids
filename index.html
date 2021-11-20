@@ -132,8 +132,11 @@
         // Altura da nave
         this.height = 50;
 
-        // Velocidade da nave
-        this.vel = 3;
+        // Velociade máxima
+        this.accelLimit = 3;
+
+        // Velocidade atual
+        this.curAccel = 0;
 
         // Ângulo da nave
         this.angle = 0;
@@ -244,16 +247,23 @@
           spaceship.imgsrc = "img/spaceship_fire.svg";
         }
 
-        // Atualizar o movimento da nave de acordo com o ângulo para onde está virada
-        spaceship.x += Math.cos(spaceship.angle - (Math.PI / 2)) * spaceship.vel;
-        spaceship.y += Math.sin(spaceship.angle - (Math.PI / 2)) * spaceship.vel;
-        
+        if (spaceship.curAccel < spaceship.accelLimit) {
+          spaceship.curAccel += 0.02;
+        }
       } else {
         // Quando a nave estiver parada, alterar o source do SVG para não ser mostrado o fogo
         if (spaceship.imgsrc != "img/spaceship.svg") {
           spaceship.imgsrc = "img/spaceship.svg";
         }
+
+        if(spaceship.curAccel > 0) {
+          spaceship.curAccel -= 0.01;
+        }
       }
+
+      // Atualizar o movimento da nave de acordo com o ângulo para onde está virada
+      spaceship.x += Math.cos(spaceship.angle - (Math.PI / 2)) * spaceship.curAccel;
+      spaceship.y += Math.sin(spaceship.angle - (Math.PI / 2)) * spaceship.curAccel;
 
       if (keys["ArrowLeft"]) {
         spaceship.angle -= 0.05;
