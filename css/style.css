@@ -28,6 +28,7 @@ canvas {
   background: url("../img/background.jpg");
   width: 100%;
   height: 100%;
+  object-fit: contain;
 }
 
 .menu {

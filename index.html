@@ -32,9 +32,16 @@
     const ctx = canvas.getContext("2d");
     const W = canvas.width;
     const H = canvas.height;
+    const ASTEROID_LEVELS = [
+      { level: 1, width: 210, height: 182 },
+      { level: 2, width: 150, height: 130 },
+      { level: 3, width: 75, height: 65 }
+    ];
 
     // TO DO
     // Verificar se o asteróide não nasce em cima da nave - createAsteroid()
+    // Colisões (nave com asteróides e balas com asteróides)
+    // Sistema de vidas, pontos e rondas
 
     // Array que irá ficar com as teclas pressionadas
     let keys = new Array();
@@ -59,20 +66,26 @@
           // Posição inicial Y
           this.y = y;
 
+          // Nível do asteróide
+          this.level = 1;
+
           // Largura do asteróide
-          this.width = width;
+          this.width = ASTEROID_LEVELS.filter(level => level.level == this.level)[0].width;
 
           // Altura do asteróide
-          this.height = height;
+          this.height = ASTEROID_LEVELS.filter(level => level.level == this.level)[0].height;
 
           // Ângulo aleatório
-          this.angle = (Math.random() * 360) * Math.PI / 180;
+          this.angle = (Math.random() * 361) * (Math.PI / 180);
+
+          // Velocidade do asteróide
+          this.vel = 2;
 
           // Movimento no eixo X
-          this.dX = Math.random() < 0.5 ? -2 : 2;
+          this.dX = Math.cos(this.angle - (Math.PI / 2)) * this.vel;
 
           // Movimento no eixo Y
-          this.dY = Math.random() < 0.5 ? -2 : 2;
+          this.dY = Math.sin(this.angle - (Math.PI / 2)) * this.vel;
       }
 
       draw() {
@@ -85,19 +98,22 @@
         ctx.restore();
       }
 
-      update() { 
-        if (this.x + this.width > W || this.x <= 0) {
-          this.dX = -this.dX;
+      update() {
+        // Se o asteróide ultrapassar os limites do canvas, trocar-lhe as coordenadas
+        if (this.x < 0 - this.width) {
+          this.x = W + this.width;
+        } else if (this.x > W + this.width) {
+          this.x = 0 - this.width;
         }
 
-        if (this.y + this.height > H || this.y <= 0) {
-          this.dY = -this.dY;
+        if (this.y < 0 - this.height) {
+          this.y = H + this.height;
+        } else if (this.y > H + this.height) {
+          this.y = 0 - this.height;
         }
 
-        // // Atualiza a posição horizontal
+        // Atualiza o movimento do asteróide
         this.x += this.dX;
-
-        // // Atualiza a posição vertical
         this.y += this.dY;
       }
     }
@@ -135,31 +151,70 @@
         ctx.drawImage(image, 0 - (this.width / 2), 0 - (this.height / 2), this.width, this.height);
         ctx.restore();
       }
+
+      update() {
+        // Se a nave ultrapassar os limites do canvas, trocar-lhe as coordenadas
+        if (this.x < 0 - this.width) {
+          this.x = W + this.width;
+        } else if (this.x > W + this.width) {
+          this.x = 0 - this.width;
+        }
+
+        if (this.y < 0 - this.height) {
+          this.y = H + this.height;
+        } else if (this.y > H + this.height) {
+          this.y = 0 - this.height;
+        }
+      }
     }
     
     class Bullet {
-      constructor(x, y, r) {
+      constructor(x, y, a) {
+        // Posição inicial X
         this.x = x;
+
+        // Posição inicial Y
         this.y = y;
-        this.r = r;
-        this.vel = 3;
+
+        // Raio da bala
+        this.r = 4;
+
+        // Velocidade da bala
+        this.vel = 5;
+
+        // Ângulo da nave quando a bala foi disparada
+        this.angle = a;
+
+        // Guardar a data do disparo da bala para poder ser possível aplicar o delay
+        this.date = new Date();
+
+        // Delay entre o disparo das balas em milissegundos
+        this.delay = 150;
       }
 
       draw() {
+        ctx.save();
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI);
+        ctx.translate(this.x + (spaceship.width / 2), this.y + (spaceship.height / 2));
+        ctx.rotate(this.angle)
+        ctx.arc(0, 0 - spaceship.height / 2, this.r, 0, 2 * Math.PI);
         ctx.fillStyle = "white";
-        ctx.globalAlpha = 1;
         ctx.fill();
+        ctx.closePath();
+        ctx.restore();
       }
 
       update() {
-        for(let i = 0; i < bullets.length; i++) {
+        // Remover as balas que já saíram do ecrã
+        for (let i = 0; i < bullets.length; i++) {
           if (bullets[i].y < 0 - this.r) {
             bullets.splice(i, 1);
           }
         }
-        this.y -= this.vel;
+
+        // Atualizar o movimento das balas que estão ativas 
+        this.x += Math.cos(this.angle - (Math.PI / 2)) * this.vel;
+        this.y += Math.sin(this.angle - (Math.PI / 2)) * this.vel;
       }
     }
     
@@ -184,16 +239,17 @@
     
     function handleSpaceshipControls() {
       if (keys["ArrowUp"]) {
+        // Quando a nave se mover, alterar o source do SVG para ser mostrado o fogo
         if (spaceship.imgsrc != "img/spaceship_fire.svg") {
           spaceship.imgsrc = "img/spaceship_fire.svg";
         }
 
-        let dX = Math.cos(spaceship.angle) * spaceship.vel;
-        let dY = Math.sin(spaceship.angle) * spaceship.vel;
-        spaceship.x += dX;
-        spaceship.y -= dY;
+        // Atualizar o movimento da nave de acordo com o ângulo para onde está virada
+        spaceship.x += Math.cos(spaceship.angle - (Math.PI / 2)) * spaceship.vel;
+        spaceship.y += Math.sin(spaceship.angle - (Math.PI / 2)) * spaceship.vel;
         
       } else {
+        // Quando a nave estiver parada, alterar o source do SVG para não ser mostrado o fogo
         if (spaceship.imgsrc != "img/spaceship.svg") {
           spaceship.imgsrc = "img/spaceship.svg";
         }
@@ -208,12 +264,12 @@
       }
 
       if (keys[" "]) { // Lidar com a tecla de espaço
-        if (isAbleToShoot) {
-          createBullet();
-          isAbleToShoot = false;
+        // Se a última bala tiver sido disparada há mais de X milissegudos atrás, permitir novo disparo
+        const LAST_BULLET = bullets[bullets.length -1];
+
+        if (bullets.length == 0 || new Date().getTime() - LAST_BULLET.date.getTime() >= LAST_BULLET.delay) {
+          bullets.push(new Bullet(spaceship.x, spaceship.y, spaceship.angle));
         }
-      } else {
-        isAbleToShoot = true;
       }
     }
 
@@ -232,6 +288,7 @@
       
       // Desenhar nave
       spaceship.draw();
+      spaceship.update();
 
       // Desenhar balas
       bullets.forEach(bullet => {
@@ -242,18 +299,10 @@
       window.requestAnimationFrame(render);
     }
 
-    function createShip() {
-      spaceship = new Spaceship(W / 2, H / 2);
-    }
-
-    function createBullet() {
-      bullets.push(new Bullet(spaceship.x + (spaceship.width / 2), spaceship.y, 4));
-    }
-
     function createAsteroid(num) {
       for (let i = 0; i < num; i++) {
         // Verificar se o asteróide não nasce em cima da nave
-        arrayAsteroids.push(new Asteroid(Math.random() * (W - 55), Math.random() * (H - 50), 55, 50));
+        arrayAsteroids.push(new Asteroid(Math.random() * (W - 55), Math.random() * (H - 50)));
       }
     }
 
@@ -269,7 +318,7 @@
       canvas.style.display = "block";
 
       // Desenhar nave
-      createShip();
+      spaceship = new Spaceship(W / 2, H / 2);
 
       // Desenhar asteróide
       createAsteroid(10);
