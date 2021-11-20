@@ -33,9 +33,9 @@
     const W = canvas.width;
     const H = canvas.height;
     const ASTEROID_LEVELS = [
-      { level: 1, width: 210, height: 182 },
-      { level: 2, width: 150, height: 130 },
-      { level: 3, width: 75, height: 65 }
+      { level: 1, width: 210, height: 210 },
+      { level: 2, width: 150, height: 150 },
+      { level: 3, width: 75, height: 75 }
     ];
 
     // TO DO
@@ -55,47 +55,50 @@
     // Array que irá conter todos os asteróides ativos
     let arrayAsteroids = new Array();
 
-    // Variável que irá ditar se o utilizador pode ou não disparar
-    let isAbleToShoot = true;
-
     class Asteroid {
       constructor(x, y, width, height) {
-          // Posição inicial X
-          this.x = x;
+        // Nível do asteróide
+        this.level = 1;
 
-          // Posição inicial Y
-          this.y = y;
+        // Largura do asteróide
+        this.width = ASTEROID_LEVELS.filter(level => level.level == this.level)[0].width;
 
-          // Nível do asteróide
-          this.level = 1;
+        // Altura do asteróide
+        this.height = ASTEROID_LEVELS.filter(level => level.level == this.level)[0].height;
 
-          // Largura do asteróide
-          this.width = ASTEROID_LEVELS.filter(level => level.level == this.level)[0].width;
+        // Posição inicial X
+        this.x = Math.floor(Math.random() * ((W - this.width) - 0 + 1) + 0);
 
-          // Altura do asteróide
-          this.height = ASTEROID_LEVELS.filter(level => level.level == this.level)[0].height;
+        // Posição inicial Y
+        this.y = Math.floor(Math.random() * ((H - this.height) - 0 + 1) + 0);
 
-          // Ângulo aleatório
-          this.angle = (Math.random() * 361) * (Math.PI / 180);
+        // Ângulo aleatório
+        this.angle = (Math.random() * 361) * (Math.PI / 180);
 
-          // Velocidade do asteróide
-          this.vel = 2;
+        // Velocidade do asteróide
+        this.vel = 2;
 
-          // Movimento no eixo X
-          this.dX = Math.cos(this.angle - (Math.PI / 2)) * this.vel;
+        // Movimento no eixo X
+        this.dX = Math.cos(this.angle - (Math.PI / 2)) * this.vel;
 
-          // Movimento no eixo Y
-          this.dY = Math.sin(this.angle - (Math.PI / 2)) * this.vel;
+        // Movimento no eixo Y
+        this.dY = Math.sin(this.angle - (Math.PI / 2)) * this.vel;
       }
 
       draw() {
         ctx.save();
-        ctx.translate(this.x, this.y);
+        ctx.translate(this.x + (this.width / 2), this.y + (this.height / 2));
         ctx.rotate(this.angle);
         const image = new Image();
         image.src = "img/asteroid.svg"
-        ctx.drawImage(image, 0, 0, this.width, this.height);
+        ctx.drawImage(image, 0 - (this.width / 2), 0 - (this.height / 2), this.width, this.height);
         ctx.restore();
+
+        ctx.beginPath();
+        ctx.arc(this.x + (this.width / 2), this.y + (this.height / 2), this.width / 2, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.25)";
+        ctx.fill();
+        ctx.closePath();
       }
 
       update() {
@@ -116,8 +119,12 @@
         this.x += this.dX;
         this.y += this.dY;
       }
-    }
     
+      getCenter(coord) {
+        return coord == "x" ? this.x + (this.width / 2) : this.y + (this.height / 2);
+      }
+    }
+
     class Spaceship {
       constructor(x, y) {
         // Posição inicial X
@@ -153,6 +160,12 @@
         ctx.rotate(this.angle);
         ctx.drawImage(image, 0 - (this.width / 2), 0 - (this.height / 2), this.width, this.height);
         ctx.restore();
+
+        ctx.beginPath();
+        ctx.arc(this.x + (this.width / 2), this.y + (this.height / 2), this.width / 2, 0, Math.PI * 2);
+        ctx.strokeStyle = "red";
+        ctx.stroke();
+        ctx.closePath();
       }
 
       update() {
@@ -169,24 +182,28 @@
           this.y = 0 - this.height;
         }
       }
-    }
     
+      getCenter(coord) {
+        return coord == "x" ? this.x + (this.width / 2) : this.y + (this.height / 2);
+      }
+    }
+
     class Bullet {
-      constructor(x, y, a) {
-        // Posição inicial X
-        this.x = x;
-
-        // Posição inicial Y
-        this.y = y;
-
+      constructor() {
         // Raio da bala
-        this.r = 4;
+        this.r = 5;
 
         // Velocidade da bala
         this.vel = 5;
 
-        // Ângulo da nave quando a bala foi disparada
-        this.angle = a;
+        // Ângulo de direção da bala
+        this.angle = spaceship.angle;
+
+        // Posição inicial X
+        this.x = spaceship.x + (spaceship.width / 2) + spaceship.width / 2 * Math.cos(this.angle - (Math.PI / 2));
+
+        // Posição inicial Y
+        this.y = spaceship.y + (spaceship.height / 2) + spaceship.height / 2 * Math.sin(this.angle - (Math.PI / 2));
 
         // Guardar a data do disparo da bala para poder ser possível aplicar o delay
         this.date = new Date();
@@ -196,15 +213,11 @@
       }
 
       draw() {
-        ctx.save();
         ctx.beginPath();
-        ctx.translate(this.x + (spaceship.width / 2), this.y + (spaceship.height / 2));
-        ctx.rotate(this.angle)
-        ctx.arc(0, 0 - spaceship.height / 2, this.r, 0, 2 * Math.PI);
+        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
         ctx.fillStyle = "white";
         ctx.fill();
         ctx.closePath();
-        ctx.restore();
       }
 
       update() {
@@ -222,17 +235,11 @@
     }
     
     window.addEventListener("keydown", event => {
-      // Limpar o ecrã porque...
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
       keys[event.key] = true;
       event.preventDefault();
     });
 
     window.addEventListener("keyup", event => {
-      // Limpar o ecrã porque...
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
       keys[event.key] = false;
     });
     
@@ -247,6 +254,7 @@
           spaceship.imgsrc = "img/spaceship_fire.svg";
         }
 
+        // Aumentar a aceleração da nave quando a seta para cima for pressionada
         if (spaceship.curAccel < spaceship.accelLimit) {
           spaceship.curAccel += 0.02;
         }
@@ -256,6 +264,7 @@
           spaceship.imgsrc = "img/spaceship.svg";
         }
 
+        // Diminuir a aceleração da nave quando a seta para cima for largada
         if(spaceship.curAccel > 0) {
           spaceship.curAccel -= 0.01;
         }
@@ -278,7 +287,7 @@
         const LAST_BULLET = bullets[bullets.length -1];
 
         if (bullets.length == 0 || new Date().getTime() - LAST_BULLET.date.getTime() >= LAST_BULLET.delay) {
-          bullets.push(new Bullet(spaceship.x, spaceship.y, spaceship.angle));
+          bullets.push(new Bullet());
         }
       }
     }
@@ -305,6 +314,19 @@
         bullet.draw();
         bullet.update();
       });
+
+
+      // Verificar colisões de balas com asteróides
+      // Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))
+      for (let i = 0; i < bullets.length; i++) {
+        for (let j = 0; j < arrayAsteroids.length; j++) {
+          if (Math.sqrt(Math.pow(arrayAsteroids[j].getCenter("x") - bullets[i].x, 2) + Math.pow(arrayAsteroids[j].getCenter("y") - bullets[i].y, 2)) < bullets[i].r + (arrayAsteroids[j].width / 2)) {
+            console.log("Hit!");
+            bullets.splice(i, 1);
+            break;
+          }
+        }
+      }
       
       window.requestAnimationFrame(render);
     }
@@ -312,7 +334,7 @@
     function createAsteroid(num) {
       for (let i = 0; i < num; i++) {
         // Verificar se o asteróide não nasce em cima da nave
-        arrayAsteroids.push(new Asteroid(Math.random() * (W - 55), Math.random() * (H - 50)));
+        arrayAsteroids.push(new Asteroid());
       }
     }
 
@@ -322,6 +344,10 @@
       startGame();
     }, 1);
     
+    function distBetweenPoints(x1, y1, x2, y2) {
+      return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    }
+
     function startGame() {
       // Show the canvas
       document.querySelector(".menu").style.display = "none";
