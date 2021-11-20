@@ -32,11 +32,14 @@
     const ctx = canvas.getContext("2d");
     const W = canvas.width;
     const H = canvas.height;
+    const FPS = 60; // Em certos computadores o jogo dava lento e alguns controlos deixavam de funcionar
     const ASTEROID_LEVELS = [
       { level: 1, width: 210, height: 182 },
       { level: 2, width: 150, height: 130 },
       { level: 3, width: 75, height: 65 }
     ];
+
+    setInterval(render, 1000 / FPS);
 
     // TO DO
     // Verificar se o asteróide não nasce em cima da nave - createAsteroid()
@@ -296,7 +299,7 @@
         bullet.update();
       });
       
-      window.requestAnimationFrame(render);
+      // window.requestAnimationFrame(render);
     }
 
     function createAsteroid(num) {
@@ -324,7 +327,7 @@
       createAsteroid(10);
 
       // Start the animation
-      render();
+      // render();
       console.log("The game has started");
     }
   </script>
