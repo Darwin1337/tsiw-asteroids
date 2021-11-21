@@ -32,15 +32,15 @@
     const ctx = canvas.getContext("2d");
     const W = canvas.width;
     const H = canvas.height;
-    const ASTEROID_LEVELS = [
-      { level: 1, width: 210, height: 210, points: 200 },
-      { level: 2, width: 150, height: 150, points: 350 },
-      { level: 3, width: 75, height: 75, points: 500 }
+    const ASTEROID_LEVELS = [ // Utilizamos diferentes imagens com diferentes tamanhos pois o scale dinâmico da imagem afeta bastante a perfomance
+      { level: 1, width: 210, height: 210, points: 200, img: "img/asteroid1.svg" },
+      { level: 2, width: 150, height: 150, points: 350, img: "img/asteroid2.svg" },
+      { level: 3, width: 75, height: 75, points: 500, img: "img/asteroid3.svg" }
     ];
 
     // TO DO
     // Verificar se o asteróide não nasce em cima da nave - createAsteroid()
-    // Colisões (nave com asteróides e balas com asteróides)
+    // Colisões (nave com asteróides)
     // Sistema de vidas, pontos e rondas
 
     // Array que irá ficar com as teclas pressionadas
@@ -54,6 +54,9 @@
 
     // Array que irá conter todos os asteróides ativos
     let arrayAsteroids = new Array();
+
+    // Variável que irá ficar com as imagens da nave sem fogo e da nave com fogo para o new Image() não estar sempre a ser chamado no draw()
+    let imgSpaceship = new Image();
 
     class Asteroid {
       constructor(x, y, level) {
@@ -72,6 +75,12 @@
         // Posição inicial Y
         this.y = y == 0 ? Math.floor(Math.random() * ((H - this.height) - 0 + 1) + 0) : y;
 
+        // Propriedade do objeto Image
+        this.img = new Image();
+
+        // Extrair o url do asteróide para o filter() não estar sempre a ser executado
+        this.imgsrc = ASTEROID_LEVELS.filter(level => level.level == this.level)[0].img;
+
         // Ângulo aleatório
         this.angle = (Math.random() * 361) * (Math.PI / 180);
 
@@ -89,9 +98,8 @@
         ctx.save();
         ctx.translate(this.x + (this.width / 2), this.y + (this.height / 2));
         ctx.rotate(this.angle);
-        const image = new Image();
-        image.src = "img/asteroid.svg"
-        ctx.drawImage(image, 0 - (this.width / 2), 0 - (this.height / 2), this.width, this.height);
+        this.img.src = this.imgsrc;
+        ctx.drawImage(this.img, 0 - (this.width / 2), 0 - (this.height / 2));
         ctx.restore();
 
         // Círculo por cima dos asteróides para haver uma melhor noção das colisões
@@ -154,12 +162,11 @@
       }
 
       draw() {
-        const image = new Image();
-        image.src = this.imgsrc;
+        imgSpaceship.src = this.imgsrc;
         ctx.save();
         ctx.translate(this.x + (this.width / 2), this.y + (this.height / 2));
         ctx.rotate(this.angle);
-        ctx.drawImage(image, 0 - (this.width / 2), 0 - (this.height / 2), this.width, this.height);
+        ctx.drawImage(imgSpaceship, 0 - (this.width / 2), 0 - (this.height / 2));
         ctx.restore();
 
         // Círculo por cima da nave para haver uma melhor noção das colisões
@@ -358,10 +365,6 @@
       document.querySelector(".menu").style.display = "flex";
       startGame();
     }, 1);
-    
-    function distBetweenPoints(x1, y1, x2, y2) {
-      return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-    }
 
     function startGame() {
       // Show the canvas
