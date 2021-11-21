@@ -6,17 +6,14 @@
                 stroke: #fff;
                 stroke-miterlimit: 10;
                 stroke-width: 0.5px;
-                opacity: 0.25;
             }
 
             .cls-2 {
                 fill: #e6332a;
-                opacity: 0.5;
             }
 
             .cls-3 {
                 fill: #f39200;
-                opacity: 0.45;
             }
         </style>
     </defs>
