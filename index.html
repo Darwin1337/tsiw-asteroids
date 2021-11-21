@@ -33,9 +33,9 @@
     const W = canvas.width;
     const H = canvas.height;
     const ASTEROID_LEVELS = [
-      { level: 1, width: 210, height: 210 },
-      { level: 2, width: 150, height: 150 },
-      { level: 3, width: 75, height: 75 }
+      { level: 1, width: 210, height: 210, points: 200 },
+      { level: 2, width: 150, height: 150, points: 350 },
+      { level: 3, width: 75, height: 75, points: 500 }
     ];
 
     // TO DO
@@ -56,9 +56,9 @@
     let arrayAsteroids = new Array();
 
     class Asteroid {
-      constructor(x, y, width, height) {
+      constructor(x, y, level) {
         // Nível do asteróide
-        this.level = 1;
+        this.level = level;
 
         // Largura do asteróide
         this.width = ASTEROID_LEVELS.filter(level => level.level == this.level)[0].width;
@@ -67,10 +67,10 @@
         this.height = ASTEROID_LEVELS.filter(level => level.level == this.level)[0].height;
 
         // Posição inicial X
-        this.x = Math.floor(Math.random() * ((W - this.width) - 0 + 1) + 0);
+        this.x = x == 0 ? Math.floor(Math.random() * ((W - this.width) - 0 + 1) + 0) : x;
 
         // Posição inicial Y
-        this.y = Math.floor(Math.random() * ((H - this.height) - 0 + 1) + 0);
+        this.y = y == 0 ? Math.floor(Math.random() * ((H - this.height) - 0 + 1) + 0) : y;
 
         // Ângulo aleatório
         this.angle = (Math.random() * 361) * (Math.PI / 180);
@@ -94,11 +94,12 @@
         ctx.drawImage(image, 0 - (this.width / 2), 0 - (this.height / 2), this.width, this.height);
         ctx.restore();
 
-        ctx.beginPath();
-        ctx.arc(this.x + (this.width / 2), this.y + (this.height / 2), this.width / 2, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(255, 255, 255, 0.25)";
-        ctx.fill();
-        ctx.closePath();
+        // Círculo por cima dos asteróides para haver uma melhor noção das colisões
+        // ctx.beginPath();
+        // ctx.arc(this.x + (this.width / 2), this.y + (this.height / 2), this.width / 2, 0, Math.PI * 2);
+        // ctx.fillStyle = "rgba(255, 255, 255, 0.25)";
+        // ctx.fill();
+        // ctx.closePath();
       }
 
       update() {
@@ -161,11 +162,12 @@
         ctx.drawImage(image, 0 - (this.width / 2), 0 - (this.height / 2), this.width, this.height);
         ctx.restore();
 
-        ctx.beginPath();
-        ctx.arc(this.x + (this.width / 2), this.y + (this.height / 2), this.width / 2, 0, Math.PI * 2);
-        ctx.strokeStyle = "red";
-        ctx.stroke();
-        ctx.closePath();
+        // Círculo por cima da nave para haver uma melhor noção das colisões
+        // ctx.beginPath();
+        // ctx.arc(this.x + (this.width / 2), this.y + (this.height / 2), this.width / 2, 0, Math.PI * 2);
+        // ctx.strokeStyle = "red";
+        // ctx.stroke();
+        // ctx.closePath();
       }
 
       update() {
@@ -315,26 +317,39 @@
         bullet.update();
       });
 
-
       // Verificar colisões de balas com asteróides
       // Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))
       for (let i = 0; i < bullets.length; i++) {
         for (let j = 0; j < arrayAsteroids.length; j++) {
+          // Se entrar neste if statement, quer dizer que a bala atingiu um asteróide
           if (Math.sqrt(Math.pow(arrayAsteroids[j].getCenter("x") - bullets[i].x, 2) + Math.pow(arrayAsteroids[j].getCenter("y") - bullets[i].y, 2)) < bullets[i].r + (arrayAsteroids[j].width / 2)) {
-            console.log("Hit!");
+            // Guardar as informações necessárias do asteróide atingido
+            const LAST_LEVEL = arrayAsteroids[j].level;
+            const LAST_COORDS = [arrayAsteroids[j].x, arrayAsteroids[j].y];
+
+            // Remover a bala que atingiu o asteróide
             bullets.splice(i, 1);
+
+            // Remover o asteróide atingido
+            arrayAsteroids.splice(j, 1);
+
+            if (LAST_LEVEL != 3) {
+              // Se o nível do asteróide atingido não for o último, dividi-lo em 2 com nível superior
+              arrayAsteroids.push(new Asteroid(LAST_COORDS[0] + 2, LAST_COORDS[1] + 2, LAST_LEVEL + 1));
+              arrayAsteroids.push(new Asteroid(LAST_COORDS[0] - 2, LAST_COORDS[1] - 2, LAST_LEVEL + 1));
+            }
             break;
           }
         }
       }
-      
+
       window.requestAnimationFrame(render);
     }
 
-    function createAsteroid(num) {
+    function createAsteroid(num, level) {
       for (let i = 0; i < num; i++) {
         // Verificar se o asteróide não nasce em cima da nave
-        arrayAsteroids.push(new Asteroid());
+        arrayAsteroids.push(new Asteroid(0, 0, level));
       }
     }
 
@@ -357,7 +372,7 @@
       spaceship = new Spaceship(W / 2, H / 2);
 
       // Desenhar asteróide
-      createAsteroid(10);
+      createAsteroid(5, 1);
 
       // Start the animation
       render();
