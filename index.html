@@ -350,6 +350,14 @@
         }
       }
 
+      for (let i = 0; i < arrayAsteroids.length; i++) {
+        // Se entrar neste if statement, quer dizer que a nave atingiu um asteróide
+        if (Math.sqrt(Math.pow(arrayAsteroids[i].getCenter("x") - spaceship.getCenter("x"), 2) + Math.pow(arrayAsteroids[i].getCenter("y") - spaceship.getCenter("y"), 2)) < spaceship.width / 2 + (arrayAsteroids[i].width / 2)) {
+          console.log("bateu");
+          // Implementar o sistema de vidas
+        }
+      }
+
       window.requestAnimationFrame(render);
     }
 

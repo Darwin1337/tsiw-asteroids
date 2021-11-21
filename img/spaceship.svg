@@ -5,6 +5,7 @@
                 fill: #36a9e1;
                 stroke: #1d1d1b;
                 stroke-miterlimit: 10;
+                opacity: 0.25;
             }
         </style>
     </defs>
