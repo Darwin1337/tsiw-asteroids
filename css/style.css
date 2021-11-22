@@ -1,3 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+* {
+  font-family: 'VT323', monospace;
+}
+
 html, body {
   width: 100%;
   height: 100%;
@@ -6,7 +12,7 @@ html, body {
 }
 
 body {
-  background: url("../img/background.jpg");
+  background: url("../img/background.png");
 }
 
 .intro {
@@ -33,37 +39,6 @@ canvas {
   height: 100%;
   object-fit: contain;
 }
-#canvas-wrap { position:relative } /* Make this a positioned parent */
-#overlay     { position:absolute; top:20px; left:30px; }
-
-.alignCenter{
-  font-size:100px;
-  color:white;
-  margin: 0;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-.buttonReset{
-  font-size:100px;
-  
-  color:Black;
-  
-  margin: 0;
-  position: absolute;
-  top: 70%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-.gameover{
-  width: 100%;
-  top: 0px;
-  height: 100%;
-  background: black;
-  position: fixed;
-  opacity: 0.5;
-}
 
 .menu {
   width: 100%;
@@ -85,4 +60,94 @@ canvas {
 
 .menu ul li {
   padding: 15px;
+}
+
+.game-over {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 15px;
+  visibility: hidden;
+}
+
+.game-over p {
+  height: fit-content;
+  padding: 0;
+  margin: 0;
+  color: white;
+  font-size: 3em;
+}
+
+.game-over button {
+  font-size: 1.5em;
+}
+
+.game-stats {
+  visibility: hidden;
+}
+
+.left-side {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  gap: 25px;
+}
+
+.left-side .text-title,
+.left-side .text {
+  padding-left: 15px;
+  color: white;
+  pointer-events: none;
+}
+
+.left-side .text-title {
+  margin: 15px 0 0 0;
+  font-size: 1.5em;
+}
+
+.left-side .text {
+  margin: 0;
+  font-size: 3em;
+}
+
+.game-stats .middle {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.game-stats .middle .lives {
+  margin: 15px 0 0 0;
+}
+
+.highest-score {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.highest-score .text-title,
+.highest-score .text {
+  padding-right: 15px;
+  color: white;
+  pointer-events: none;
+}
+
+.highest-score .text-title {
+  margin: 15px 0 0 0;
+  font-size: 1.5em;
+}
+
+.highest-score .text {
+  margin: 0;
+  font-size: 3em;
+  text-align: right;
 }

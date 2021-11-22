@@ -2,8 +2,10 @@
     <defs>
         <style>
             .cls-1 {
-                fill: #575756;
+                fill: #8B979C;
                 opacity: 0.75;
+                stroke: #5a6163;
+                stroke-width: 3px;
             }
         </style>
     </defs>
