@@ -319,7 +319,8 @@
 
             // Se o utilizador não tiver mais vidas, mostrar ecrã de game over
             if(gameStats.lives < 1) {
-              document.querySelector(".game-over").style.visibility = "visible";
+              canvas.style.display = "none";
+              document.querySelector(".game-over").style.display = "flex";
               shouldRenderBeExecuted = false;
               arrayAsteroids = new Array();
             }
@@ -472,7 +473,7 @@
 
     function startGame() {
       // Esconder o menu e mostrar o canvas e as estatísticas
-      document.querySelector(".game-over").style.visibility = "hidden";
+      document.querySelector(".game-over").style.display = "none";
       document.querySelector(".menu").style.display = "none";
       canvas.style.display = "block";
       document.querySelector(".game-stats").style.visibility = "visible";
@@ -510,7 +511,7 @@
     setTimeout(function() {
       document.querySelector(".intro").style.display = "none";
       document.querySelector(".menu").style.display = "flex";
-      startGame();
+      // startGame();
     }, 1000);
   </script>
 </body>
