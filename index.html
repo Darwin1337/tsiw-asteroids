@@ -215,6 +215,7 @@
             // Verificar se a pontuação atual é maior que a melhor pontuação
             if (gameStats.score > gameStats.highestScore) {
               localStorage.setItem("highscore", gameStats.score);
+              gameStats.highestScore = gameStats.score;
               document.querySelector(".highest-score .text").innerHTML = gameStats.score;
             }
   
@@ -488,6 +489,7 @@
       document.querySelectorAll(".lives img").forEach(heart => heart.src = "img/heart.png");
       document.querySelector(".current-score .text").innerHTML = gameStats.points;
       document.querySelector(".current-round .text").innerHTML = gameStats.round;
+      document.querySelector(".highest-score .text").innerHTML = gameStats.highestScore;
 
       // Desenhar nave
       if (!spaceship) {
