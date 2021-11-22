@@ -23,7 +23,15 @@
     </ul>
   </div>
 
-  <canvas></canvas>
+  <div id="canvas-wrap">
+    <canvas></canvas>
+    <div id="gameover">
+      
+    </div>
+    <div id="overlay">
+      
+    </div>
+  </div>
 
   <script>
     const canvas = document.querySelector("canvas");
@@ -57,6 +65,12 @@
 
     // Variável que irá ficar com as imagens da nave sem fogo e da nave com fogo para o new Image() não estar sempre a ser chamado no draw()
     let imgSpaceship = new Image();
+
+    // Variável que irá ficar com a quantidade de vidas que o utilizador tem
+    let vidas=1;
+
+    // Variável que irá  ficar com a quantidade de vidas que o utilizador tem
+    let animar=true;
 
     class Asteroid {
       constructor(x, y, level) {
@@ -302,6 +316,9 @@
     }
 
     function render() {
+      if(animar){
+
+      
       // Limpar o ecrã todas as vezes que o render for executado
       ctx.clearRect(0, 0, W, H);
 
@@ -351,14 +368,48 @@
       }
 
       // Verificar colisões da nave com asteróides
+      let bateu=false;
+      
       for (let i = 0; i < arrayAsteroids.length; i++) {
         // Se entrar neste if statement, quer dizer que a bala atingiu um asteróide
         if (Math.sqrt(Math.pow(arrayAsteroids[i].getCenter("x") - spaceship.getCenter("x"), 2) + Math.pow(arrayAsteroids[i].getCenter("y") - spaceship.getCenter("y"), 2)) < spaceship.width / 2 + (arrayAsteroids[i].width / 2)) {
-          console.log("bateu");
+          
+          spaceship.x=W/2;
+          spaceship.y=H/2;
+          spaceship.curAccel=0;
+          spaceship.angle=0;
+          vidas--
+          renderVidas()
+          if(vidas<1){
+            document.getElementById("gameover").innerHTML=`
+            <h1 class="alignCenter">GAME OVER</h1>
+            <br>
+            <button class="buttonReset" id="recomecar"> Recomeçar </button>
+            `
+            document.getElementById("gameover").classList.add("gameover");
+  
+            document.getElementById("recomecar").addEventListener("click", function() {
+              alert("aq")
+            })
+            
+            animar=false;
+          }
+          break;
+
         }
       }
+        window.requestAnimationFrame(render);
+      }
+    }
 
-      window.requestAnimationFrame(render);
+    
+
+    function renderVidas(){
+      document.getElementById("overlay").innerHTML=""
+      for(let i = 0; i < vidas; i++){
+        document.getElementById("overlay").innerHTML+=`<img src="img/vida.png" style="width: 50px">`
+      }
+      
     }
 
     function createAsteroid(num, level) {
@@ -374,6 +425,9 @@
       startGame();
     }, 1);
 
+    
+    
+
     function startGame() {
       // Show the canvas
       document.querySelector(".menu").style.display = "none";
@@ -387,6 +441,7 @@
 
       // Start the animation
       render();
+      renderVidas();
       console.log("The game has started");
     }
   </script>
