@@ -21,12 +21,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: black;
 }
 
 .intro h3 {
   color: white;
-  font-size: 3.5em;
+  font-size: 5em;
 }
 
 .intro p {
@@ -43,23 +42,48 @@ canvas {
 .menu {
   width: 100%;
   height: 100%;
-  background-color: black;
   display: none;
   align-items: center;
   justify-content: center;
 }
 
-.menu ul {
-  padding: 0;
-  margin: 0;
-  list-style: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+
+.menu nav ul {
+	list-style-type: none;
+	padding: 0;
 }
 
-.menu ul li {
-  padding: 15px;
+.menu nav ul li {
+	font-size: 3em;
+	letter-spacing: 0.2em;
+	height: 1.5em;
+	line-height: 1.5em;
+	position: relative;
+	overflow: hidden;
+	margin: 0.5em;
+	cursor: pointer;
+  padding: 10px;
+}
+
+.menu nav ul li span {
+	color: white;
+	mix-blend-mode: difference;
+}
+
+.menu nav ul li::before {
+	content: '';
+	position: absolute;
+	width: 0.5em;
+	height: inherit;
+	background-color: white;
+	border-radius: 50%;
+	top: 0;
+	left: -0.75em;
+	transition: 0.5s ease-out;
+}
+
+.menu nav ul li:hover::before {
+	transform: scale(35.5);
 }
 
 .game-over {
