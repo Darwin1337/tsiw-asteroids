@@ -15,12 +15,28 @@
   <div class="intro">
     <h3>Asteróides</h3>
   </div>
-
+  <div style="position: absolute; width: 100%;">
+    <img class="asteroidAnimation" src="img/asteroid1.svg">
+    <img class="spaceshipAnimation" src="img/spaceship_fire.svg">
+  </div>
   <div class="menu">
+<<<<<<< Updated upstream
     <ul>
       <li><button id="start" type="button" name="button">Jogar</button></li>
       <li><button id="options" type="button" name="button">Opções</button></li>
     </ul>
+=======
+    
+    
+    <nav>
+      <input type="text" placeholder="NAME">
+      <ul>
+        <img src="img/spaceship_fire.svg" id="play"><li id="playbutton"><span onclick="startGame();">PLAY</span></li>
+        <li><span id="leaderboard">LEADERBOARD</span></li>
+        <li><span onclick="window.close();">QUIT</span></li>
+      </ul>
+    </nav>
+>>>>>>> Stashed changes
   </div>
 
   <canvas></canvas>
@@ -33,6 +49,23 @@
     const W = canvas.width;
     const H = canvas.height;
 
+
+
+    let asteroid = document.querySelector(".asteroidAnimation");
+    setInterval(function() {
+      asteroid.style.transform = "translateY(" + (Math.random()*window.innerHeight-300) + "px)";
+      asteroid.style.transform += "translateX(" + (Math.random()*window.innerWidth-300) + "px)";
+    }, 2000)
+
+
+    let spaceshipimg = document.querySelector("#play");
+    document.querySelector("#playbutton").addEventListener("mouseover", function(e) {
+      spaceshipimg.style.transform = "rotate(90deg)";
+      spaceshipimg.style.visibility = "visible";
+    })
+     
+    
+    
     // TO DO
     // Verificar se o asteróide não nasce em cima da nave - createAsteroid()
 
@@ -246,6 +279,7 @@
       spaceship = new Spaceship(W / 2, H / 2);
     }
 
+<<<<<<< Updated upstream
     function createBullet() {
       bullets.push(new Bullet(spaceship.x + (spaceship.width / 2), spaceship.y, 4));
     }
@@ -254,6 +288,19 @@
       for (let i = 0; i < num; i++) {
         // Verificar se o asteróide não nasce em cima da nave
         arrayAsteroids.push(new Asteroid(Math.random() * (W - 55), Math.random() * (H - 50), 55, 50));
+=======
+        if(arrayAsteroids.length ==0){
+          gameStats.round+=1
+          document.querySelector(".current-round .text").innerHTML = gameStats.round;
+          // Desenhar asteróide
+          for (let i = 0; i < 5; i++) {
+            // Verificar se o asteróide não nasce em cima da nave
+            arrayAsteroids.push(new Asteroid(0, 0, 1));
+          }
+        }
+
+        window.requestAnimationFrame(render);
+>>>>>>> Stashed changes
       }
     }
 

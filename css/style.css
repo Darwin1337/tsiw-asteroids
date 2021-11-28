@@ -30,9 +30,87 @@ canvas {
   height: 100%;
 }
 
+.asteroidAnimation{
+  position: absolute;
+  transition: transform;
+  transition-duration:2s;
+  z-index: 0;
+}
+
+#play{
+  position: absolute;
+  visibility: hidden;
+  transition: transform;
+  transition-duration:2s;
+  z-index: 0;
+}
+
+
+
+.spaceshipAnimation{
+  position: absolute;
+  transition: transform;
+  transition-duration:2s;
+  z-index: 0;
+}
+
+li{
+  z-index: 1;
+}
+
 .menu {
   width: 100%;
   height: 100%;
+<<<<<<< Updated upstream
+=======
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.menu nav ul, input, label{
+	list-style-type: none;
+	padding: 0;
+}
+
+.menu nav ul li, input, label {
+	font-size: 3em;
+	letter-spacing: 0.2em;
+	height: 1.5em;
+	line-height: 1.5em;
+	position: relative;
+	overflow: hidden;
+	margin: 0.5em;
+	cursor: pointer;
+  padding: 10px;
+}
+
+.menu nav ul li span {
+	color: white;
+	mix-blend-mode: difference;
+}
+
+.menu nav ul li::before {
+	content: '';
+	position: absolute;
+	width: 0.5em;
+	height: inherit;
+	background-color: white;
+	border-radius: 50%;
+	top: 0;
+	left: -0.75em;
+	transition: 0.5s ease-out;
+}
+
+.menu nav ul li:hover::before {
+	transform: scale(35.5);
+}
+
+.game-over {
+  width: 100%;
+  height: 100%;
+>>>>>>> Stashed changes
   background-color: black;
   display: none;
   align-items: center;
