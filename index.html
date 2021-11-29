@@ -15,13 +15,13 @@
   <div class="intro">
     <h3>Asteróides</h3>
   </div>
-
+  <img src="img/spaceship.svg" id="nave">
   <div class="menu">
     <nav>
       <ul>
-        <li><span onclick="startGame();">PLAY</span></li>
-        <li><span id="leaderboard">LEADERBOARD</span></li>
-        <li><span onclick="window.close();">QUIT</span></li>
+        <img src="img/spaceship_fire.svg" id="play"><li id="playbutton"><span>PLAY</span></li>
+        <img src="img/spaceship_fire.svg" id="leaderboardImg"><li id="leaderboard"><span >LEADERBOARD</span></li>
+        <img src="img/spaceship_fire.svg" id="quitImg"><li id="quit"><span onclick="window.close();">QUIT</span></li>
       </ul>
     </nav>
   </div>
@@ -63,6 +63,47 @@
   </div>
 
   <script>
+
+    
+  //ANIMAÇÕES
+    let nave = document.querySelector("#nave");
+    //let spaceshipimg = document.querySelector("#play");
+    document.querySelector("#playbutton").addEventListener("mouseover", function(e) {
+      nave.classList.add("animate");
+    })
+    document.querySelector("#playbutton").addEventListener("mouseleave", function(e) {
+      nave.classList.remove("animate");
+    })
+
+    let play = document.querySelector("#playbutton");
+    play.addEventListener("click", function(e) {
+      nave.classList.add("play");
+      document.querySelector(".game-over").style.display = "none";
+      document.querySelector(".menu").style.display = "none";
+      setTimeout(function(){
+        nave.remove("play");
+        startGame();
+      }, 1100)
+    })
+
+    let spaceshipimg2 = document.querySelector("#leaderboardImg");
+    document.querySelector("#leaderboard").addEventListener("mouseover", function(e) {
+      spaceshipimg2.classList.add("animate");
+    })
+    document.querySelector("#leaderboard").addEventListener("mouseleave", function(e) {
+      spaceshipimg2.classList.remove("animate");
+    })
+
+    let spaceshipimg3 = document.querySelector("#quitImg");
+    document.querySelector("#quit").addEventListener("mouseover", function(e) {
+      spaceshipimg3.classList.add("animate");
+    })
+    document.querySelector("#quit").addEventListener("mouseleave", function(e) {
+      spaceshipimg3.classList.remove("animate");
+    })
+  //ANIMAÇÕES
+
+
     const canvas = document.querySelector("canvas");
     canvas.width = window.innerWidth - 20;
     canvas.height = window.innerHeight - 20;
@@ -80,6 +121,9 @@
     // TO DO
     // Sistema de vidas, pontos e rondas (aperfeiçoar)
 
+
+    //Guardar nome
+    let playerName="";
     // Array que irá ficar com as teclas pressionadas
     let keys = new Array();
 
@@ -471,11 +515,24 @@
           bullet.update();
         });
 
+        if(arrayAsteroids.length ==0){
+          
+          gameStats.round+=1
+          document.querySelector(".current-round .text").innerHTML = gameStats.round;
+          // Desenhar asteróide
+          for (let i = 0; i < 5; i++) {
+            // Verificar se o asteróide não nasce em cima da nave
+            arrayAsteroids.push(new Asteroid(0, 0, 1));
+          }
+        }
+
         window.requestAnimationFrame(render);
       }
     }
 
     function startGame() {
+      arrayAsteroids= [];
+      bullets=[];
       // Esconder o menu e mostrar o canvas e as estatísticas
       document.querySelector(".game-over").style.display = "none";
       document.querySelector(".menu").style.display = "none";
@@ -489,6 +546,7 @@
       // Resetar as estatísticas
       gameStats.points = 0;
       gameStats.lives = 3;
+      gameStats.round = 1;
 
       // Renderizar as estatísticas resetadas
       document.querySelectorAll(".lives img").forEach(heart => heart.src = "img/heart.png");
@@ -502,7 +560,7 @@
       }
 
       // Desenhar asteróide
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 1; i++) {
         // Verificar se o asteróide não nasce em cima da nave
         arrayAsteroids.push(new Asteroid(0, 0, 1));
       }
