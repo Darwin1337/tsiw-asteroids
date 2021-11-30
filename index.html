@@ -12,9 +12,23 @@
 </head>
 
 <body>
+  <audio id="menu_switch" src="assets\mixkit-retro-arcade-casino-notification-211.wav"></audio>
+
+  <div class="pop-up">
+    <h1>Este jogo utiliza efeitos sonoros para uma experiência mais imersiva</h1>
+    <h2>Pretende ativar o som?</h2>
+    <div>
+      <button onclick="unMute()">Sim</button>
+      <button onclick="mute()">Não</button>
+    </div>
+  </div>
+  
   <div class="intro">
     <h3>Asteróides</h3>
   </div>
+
+  
+
   <img src="img/spaceship.svg" id="nave">
   <div class="menu">
     <nav>
@@ -155,6 +169,9 @@
 
     // Variável que irá deicdir se renderização deverá ser executada ou não
     let shouldRenderBeExecuted = true;
+
+    // Constante que guarda o audio da sobreposição do rato no menu 
+    const AUDIO = document.querySelector("#menu_switch");
 
     class Asteroid {
       constructor(x, y, level) {
@@ -428,7 +445,7 @@
         this.y += Math.sin(this.angle - (Math.PI / 2)) * this.vel;
       }
     }
-    
+
     window.addEventListener("keydown", event => {
       keys[event.key] = true;
       event.preventDefault();
@@ -573,8 +590,32 @@
     setTimeout(function() {
       document.querySelector(".intro").style.display = "none";
       document.querySelector(".menu").style.display = "flex";
+      document.querySelector(".pop-up").style.display = "flex";
       // startGame();
     }, 1000);
+
+    function unMute() {
+      document.querySelector(".pop-up").style.display = "none";
+      document.querySelectorAll(".menu li span").forEach(span => {
+      span.addEventListener("mouseover", function(e) {
+        AUDIO.currentTime = 0;
+        AUDIO.play();
+        });
+      });
+
+      document.querySelectorAll(".menu li span").forEach(span => {
+      span.addEventListener("mouseleave", function(e) {
+          AUDIO.currentTime = 0;
+          AUDIO.pause();
+        });
+      });
+    }
+
+    function mute() {
+      document.querySelector(".pop-up").style.display = "none";
+    }
+
+    
   </script>
 </body>
 </html>
