@@ -1,3 +1,11 @@
+// As referências ao jogo original foram retiradas daqui
+// https://atari.fandom.com/wiki/Asteroids
+// http://www.classicgaming.cc/classics/asteroids/play-guide
+// https://games.aarp.org/games/atari-asteroids
+// https://youtu.be/WYSupJ5r2zo
+// Foram apenas alterados alguns valores que, após as nossas simplificações, afetariam o jogo ao utilizador. Estes valores estão declarados no topo do documento
+// como constantes, podendo serem facilmente alterados para os valores originais
+
 const canvas = document.querySelector("canvas");
 canvas.width = window.innerWidth - 20;
 canvas.height = window.innerHeight - 20;
@@ -14,12 +22,32 @@ const ASTEROID_LEVELS = [
     { level: 3, width: 75, height: 75, points: 200, img: "img/asteroid3.svg" }
 ];
 
-// A cada 5000 pontos o utilizador recebe uma vida, no máximo só poderá ter 5. No jogo original era 10000 pontos mas como temos a 
-// remoção do UFO (que daria 1000 pontos ao jogador se eliminado) como simplificação ficaria bastante difícil para o jogador atingir os 10000 facilmente
+// TO DO
+// Animação da introdução (aperfeiçoar);
+// Guardar nome do jogador;
+// Leaderboard local com nome, pontuação e ronda;
+// O jogador deverá poder enviar a nave para o hiperespaço, causando-a a desaparecer e aparecer num lugar aleatório no ecrã, com o risco de se autodestruír ou nascer em cima de um asteróide;
+// A cada X pontos dar uma vida ao utilizador (que no máximo pode ter 5);
+// Tornar cada ronda mais difícil até o jogador atingir os 30000 pontos, a partir daí terá sempre a mesma dificuldade;
+// Resolver problema de alguns elementos SVG não funcionarem em certos browsers;
+// As balas, se excederem os limites do canvas, deverão aparecer no lugar refletido;
+// Só poderá haver 4 balas no ecrã de cada vez e as mesmas são removidas após terem percorrido uma certa distância.
+
+// De quantos em quantos pontos é que o utilizador recebe uma vida
 const POINTS_BETWEEN_LIVES = 5000;
 
-//Guardar nome
+// No jogo original, apenas são permitas 4 balas no ecrã de cada vez
+const BULLETS_ALLOWED = 4;
+
+// Quando o jogador atinge os 30000 pontos a dificuldade estabilizará
+const DIFFICULTY_MULTIPLIER_LIMIT = 30000;
+
+// Máximo de vidas que o utilizador poderá ter
+const MAX_LIVES = 5;
+
+// Guardar nome do utilizador
 let playerName = "";
+
 // Array que irá ficar com as teclas pressionadas
 let keys = new Array();
 
@@ -43,7 +71,7 @@ let gameStats = {
     name: "John Doe",
     round: 1,
     score: 0,
-    lives: 3,
+    lives: 3, // Com quantas vidas é que o jogador começará
     highestScore: localStorage.highscore ? localStorage.highscore : 0
 }
 
@@ -264,7 +292,10 @@ class Spaceship {
 
                     // Se o utilizador não tiver mais vidas, mostrar ecrã de game over
                     if (gameStats.lives < 1) {
-                        canvas.style.display = "none";
+                        // Mostrar imagem de uma explosão por cima da nave
+                        ctx.drawImage(imgExplosion, this.getCenter("x") - 30, this.getCenter("y") - 30, 60, 60);
+
+                        //Mostrar o ecrã de game over
                         document.querySelector(".game-over").style.display = "flex";
                         shouldRenderBeExecuted = false;
                     } else {
@@ -473,7 +504,6 @@ function render() {
     if (shouldRenderBeExecuted) {
         window.requestAnimationFrame(render);
     }
-    
 }
 
 function startGame() {
@@ -549,6 +579,13 @@ function unmute() {
             AUDIO.pause();
         });
     });
+}
+
+function mainMenu() {
+    document.querySelector(".game-over").style.display = "none";
+    canvas.style.display = "none";
+    document.querySelector(".game-stats").style.visibility = "hidden";
+    document.querySelector(".menu").style.display = "flex";
 }
 
 function runCountdown() {

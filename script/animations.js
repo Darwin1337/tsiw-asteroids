@@ -6,6 +6,7 @@ const SPACESHIP2 = document.querySelector("#nave-leaderboard");
 const SPACESHIP3 = document.querySelector("#nave-quit");
 
 BTN_PLAY.addEventListener("mouseover", function (e) {
+    SPACESHIP1.style.display = "";
     SPACESHIP1.style.top = (getCoordinates(e.target).y + (e.target.offsetHeight / 2)) - (document.querySelectorAll("ul img")[0].offsetHeight / 2) + "px";
     SPACESHIP1.style.left = -document.querySelectorAll("ul img")[0].offsetWidth + "px";
     SPACESHIP1.style.visibility = "visible";
@@ -58,6 +59,10 @@ BTN_QUIT.addEventListener("mouseover", function (e) {
 BTN_QUIT.addEventListener("mouseleave", function (e) {
     SPACESHIP3.style.visibility = "hidden";
     SPACESHIP3.style.transform = "";
+});
+
+document.querySelector("#render-menu").addEventListener("click", function (e) {
+    BTN_PLAY.addEventListener("mouseleave", stopAnimation);
 });
 
 function getCoordinates(el) {
