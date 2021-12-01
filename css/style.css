@@ -105,6 +105,22 @@ canvas {
   object-fit: contain;
 }
 
+.countdown {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  display: none;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.countdown p {
+  color: white;
+  font-size: 5em;
+  padding: 25px;
+  background-color: black;
+}
+
 .game-over {
   width: 100%;
   height: 100%;

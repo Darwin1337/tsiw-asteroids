@@ -4,13 +4,19 @@ canvas.height = window.innerHeight - 20;
 const ctx = canvas.getContext("2d");
 const W = canvas.width;
 const H = canvas.height;
+
+// Informações sobre os asteróides
 const ASTEROID_LEVELS = [
     // Utilizamos diferentes imagens com diferentes tamanhos pois o scale dinâmico da imagem afeta bastante a perfomance
     // https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas
-    { level: 1, width: 210, height: 210, points: 10, img: "img/asteroid1.svg" },
-    { level: 2, width: 150, height: 150, points: 25, img: "img/asteroid2.svg" },
-    { level: 3, width: 75, height: 75, points: 50, img: "img/asteroid3.svg" }
+    { level: 1, width: 210, height: 210, points: 50, img: "img/asteroid1.svg" },
+    { level: 2, width: 150, height: 150, points: 100, img: "img/asteroid2.svg" },
+    { level: 3, width: 75, height: 75, points: 200, img: "img/asteroid3.svg" }
 ];
+
+// A cada 5000 pontos o utilizador recebe uma vida, no máximo só poderá ter 5. No jogo original era 10000 pontos mas como temos a 
+// remoção do UFO (que daria 1000 pontos ao jogador se eliminado) como simplificação ficaria bastante difícil para o jogador atingir os 10000 facilmente
+const POINTS_BETWEEN_LIVES = 5000;
 
 //Guardar nome
 let playerName = "";
@@ -18,21 +24,19 @@ let playerName = "";
 let keys = new Array();
 
 // Variável que irá conter o objeto da nave
-let spaceship;
+let spaceship = null;
 
 // Array que irá conter todas as balas disparadas
 let bullets = new Array();
 
 // Array que irá conter todos os asteróides ativos
-let arrayAsteroids = new Array();
+let asteroids = new Array();
 
 // Variável que irá ficar com as imagens da nave sem fogo, da nave com fogo e da explosão para o new Image() não estar sempre a ser chamado no draw()
 let imgSpaceship = new Image();
+imgSpaceship.src = "img/spaceship.svg";
 let imgExplosion = new Image();
 imgExplosion.src = "img/explosion.png";
-
-// Se esta variável estiver a true, o utilizador não poderá usar os controlos (marioritariamente usado para quando a nave é atingida por um asteróide)
-let enableControls = true;
 
 // Variável que irá conter todas as informações do jogador e das suas estatísticas
 let gameStats = {
@@ -40,11 +44,14 @@ let gameStats = {
     round: 1,
     score: 0,
     lives: 3,
-    highestScore: localStorage.highscore ? localStorage.highscore : localStorage.setItem("highscore", 0)
+    highestScore: localStorage.highscore ? localStorage.highscore : 0
 }
 
+// Se esta variável estiver a true, o utilizador não poderá usar os controlos (marioritariamente usado para quando a nave é atingida por um asteróide)
+let enableControls = false;
+
 // Variável que irá deicdir se renderização deverá ser executada ou não
-let shouldRenderBeExecuted = true;
+let shouldRenderBeExecuted = false;
 
 class Asteroid {
     constructor(x, y, level) {
@@ -67,7 +74,7 @@ class Asteroid {
 
                 // Posição inicial Y
                 this.y = Math.floor(Math.random() * ((H - this.height) - 0 + 1) + 0);
-            } while (areObjectsColliding(this.x + (this.width / 2), this.y + (this.height / 2), spaceship.getCenter("x"), spaceship.getCenter("y"), this.width / 2, spaceship.width * 2));
+            } while (areObjectsColliding(this.x + (this.width / 2), this.y + (this.height / 2), spaceship.getCenter("x"), spaceship.getCenter("y"), this.width / 2, spaceship.width * 4));
         } else {
             // Posição inicial X
             this.x = x;
@@ -76,12 +83,11 @@ class Asteroid {
             this.y = y;
         }
 
-
         // Propriedade do objeto Image
         this.img = new Image();
 
         // Extrair o url do asteróide para o filter() não estar sempre a ser executado
-        this.imgsrc = ASTEROID_LEVELS.filter(level => level.level == this.level)[0].img;
+        this.img.src = ASTEROID_LEVELS.filter(level => level.level == this.level)[0].img;
 
         // Ângulo aleatório
         this.angle = (Math.random() * 361) * (Math.PI / 180);
@@ -103,7 +109,6 @@ class Asteroid {
         ctx.save();
         ctx.translate(this.x + (this.width / 2), this.y + (this.height / 2));
         ctx.rotate(this.angle);
-        this.img.src = this.imgsrc;
         ctx.drawImage(this.img, 0 - (this.width / 2), 0 - (this.height / 2));
         ctx.restore();
 
@@ -139,8 +144,8 @@ class Asteroid {
             if (areObjectsColliding(this.getCenter("x"), this.getCenter("y"), bullets[i].x, bullets[i].y, this.width / 2, bullets[i].r)) {
                 if (this.level < 3) {
                     // Se o nível do asteróide atingido não for o último, dividi-lo em 2 com nível superior
-                    arrayAsteroids.push(new Asteroid(this.x + 2, this.y + 2, this.level + 1));
-                    arrayAsteroids.push(new Asteroid(this.x - 2, this.y - 2, this.level + 1));
+                    asteroids.push(new Asteroid(this.x + 2, this.y + 2, this.level + 1));
+                    asteroids.push(new Asteroid(this.x - 2, this.y - 2, this.level + 1));
                 }
 
                 // Remover a bala que atingiu o asteróide
@@ -158,7 +163,17 @@ class Asteroid {
                 }
 
                 // Remover o asteróide atingido
-                arrayAsteroids.splice(arrayAsteroids.findIndex(asteroid => asteroid.id == this.id), 1);
+                asteroids.splice(asteroids.findIndex(asteroid => asteroid.id == this.id), 1);
+
+                // Se entrar aqui, o jogador destruiu todos os asteróides e passou de nível
+                if (asteroids.length == 0) {
+                    gameStats.round += 1
+                    document.querySelector(".current-round .text").innerHTML = gameStats.round;
+                    // Desenhar asteróides
+                    for (let i = 0; i < 5; i++) {
+                        asteroids.push(new Asteroid(0, 0, 1));
+                    }
+                }
 
                 // Apesar de removermos o atual asteróide ele continua a executar o resto da função
                 break;
@@ -194,12 +209,15 @@ class Spaceship {
         // Ângulo da nave
         this.angle = 0;
 
-        // Propriedade para poder ser possível alterar a imagem quando a nave está em movimento
-        this.imgsrc = "img/spaceship.svg";
+        // Váriaveis usadas para controlar o tempo e animação de explosão
+        this.isExploding = false;
+        this.explosionTime = null;
+
+        // Variável usada para controlar a animação da nave entre o fim da explosão e o início do respawn
+        this.isRespawning = false;
     }
 
     draw() {
-        imgSpaceship.src = this.imgsrc;
         ctx.save();
         ctx.translate(this.x + (this.width / 2), this.y + (this.height / 2));
         ctx.rotate(this.angle);
@@ -215,55 +233,86 @@ class Spaceship {
     }
 
     update() {
-        // Se a nave ultrapassar os limites do canvas, trocar-lhe as coordenadas
-        if (this.x < 0 - this.width) {
-            this.x = W + this.width;
-        } else if (this.x > W + this.width) {
-            this.x = 0 - this.width;
-        }
+        if (!this.isExploding) {
+            // Se a nave ultrapassar os limites do canvas, trocar-lhe as coordenadas
+            if (this.x < 0 - this.width) {
+                this.x = W + this.width;
+            } else if (this.x > W + this.width) {
+                this.x = 0 - this.width;
+            }
 
-        if (this.y < 0 - this.height) {
-            this.y = H + this.height;
-        } else if (this.y > H + this.height) {
-            this.y = 0 - this.height;
-        }
+            if (this.y < 0 - this.height) {
+                this.y = H + this.height;
+            } else if (this.y > H + this.height) {
+                this.y = 0 - this.height;
+            }
 
-        // Verificar colisões da nave com asteróides
-        for (let i = 0; i < arrayAsteroids.length; i++) {
-            // Se entrar neste if statement, quer dizer que a bala atingiu um asteróide
-            if (areObjectsColliding(arrayAsteroids[i].getCenter("x"), arrayAsteroids[i].getCenter("y"), this.getCenter("x"), this.getCenter("y"), spaceship.width / 2, arrayAsteroids[i].width / 2)) {
-                // Desabilitar os controlos da nave
-                // enableControls = false;
+            // Verificar colisões da nave com asteróides
+            for (let i = 0; i < asteroids.length; i++) {
+                // Se entrar neste if statement, quer dizer que a bala atingiu um asteróide
+                if (areObjectsColliding(asteroids[i].getCenter("x"), asteroids[i].getCenter("y"), this.getCenter("x"), this.getCenter("y"), spaceship.width / 2, asteroids[i].width / 2)) {
+                    // Decrementar e renderizar a quantidade de vidas do jogador
+                    gameStats.lives--;
+                    document.querySelector(".lives").innerHTML = "";
+                    for (let j = 0; j < gameStats.lives; j++) {
+                        document.querySelector(".lives").innerHTML += '<img src="img/heart.png" style="width: 40px;">\n';
+                    }
 
-                // Mostrar imagem de uma explosão por cima da nave
+                    for (let j = 0; j < 3 - gameStats.lives; j++) {
+                        document.querySelector(".lives").innerHTML += '<img src="img/heart_gray.png" style="width: 40px;">\n';
+                    }
+
+                    // Se o utilizador não tiver mais vidas, mostrar ecrã de game over
+                    if (gameStats.lives < 1) {
+                        canvas.style.display = "none";
+                        document.querySelector(".game-over").style.display = "flex";
+                        shouldRenderBeExecuted = false;
+                    } else {
+                        // Guardar as informações necessárias para a animação
+                        this.isExploding = true;
+                        this.explosionTime = new Date();
+
+                        // Mostrar imagem de uma explosão por cima da nave
+                        ctx.drawImage(imgExplosion, this.getCenter("x") - 30, this.getCenter("y") - 30, 60, 60);
+
+                        // Impedir o utilizador de controlar a nave
+                        enableControls = false;
+                    }
+
+                    break;
+                }
+            }
+        } else {
+            if (!this.isRespawning) {
                 ctx.drawImage(imgExplosion, this.getCenter("x") - 30, this.getCenter("y") - 30, 60, 60);
+            } else {
+                if (Math.random() > 0.5) {
+                    imgSpaceship.src = "";
+                } else {
+                    imgSpaceship.src = "img/spaceship.svg";
+                }
+            }
 
-                // Resetar as posições da nave
-                spaceship.x = (W / 2) - (this.width / 2);
-                spaceship.y = (H / 2) - (this.height / 2)
-                spaceship.curAccel = 0;
-                spaceship.angle = 0;
+            if (new Date().getTime() - this.explosionTime.getTime() >= 1000) {
+                this.isRespawning = true;
 
-                // Decrementar e renderizar a quantidade de vidas do jogador
-                gameStats.lives--;
-                document.querySelector(".lives").innerHTML = "";
-                for (let j = 0; j < gameStats.lives; j++) {
-                    document.querySelector(".lives").innerHTML += '<img src="img/heart.png" style="width: 40px;">\n';
+                let isSpawnDoable = true;
+                for (let i = 0; i < asteroids.length; i++) {
+                    if (areObjectsColliding(asteroids[i].x + (asteroids[i].width / 2), asteroids[i].y + (asteroids[i].height / 2), W / 2, H / 2, asteroids[i].width / 2, this.width * 4)) {
+                        isSpawnDoable = false;
+                        break;
+                    }
                 }
 
-                for (let j = 0; j < 3 - gameStats.lives; j++) {
-                    document.querySelector(".lives").innerHTML += '<img src="img/heart_gray.png" style="width: 40px;">\n';
+                if (isSpawnDoable) {
+                    spaceship.x = (W / 2) - (this.width / 2);
+                    spaceship.y = (H / 2) - (this.height / 2)
+                    spaceship.curAccel = 0;
+                    spaceship.angle = 0;
+                    enableControls = true;
+                    this.isExploding = false;
+                    this.isRespawning = false;
                 }
-
-                // Se o utilizador não tiver mais vidas, mostrar ecrã de game over
-                if (gameStats.lives < 1) {
-                    canvas.style.display = "none";
-                    document.querySelector(".game-over").style.display = "flex";
-                    shouldRenderBeExecuted = false;
-                    arrayAsteroids = new Array();
-                }
-
-                break;
             }
         }
     }
@@ -332,8 +381,8 @@ function handleSpaceshipControls() {
     if (enableControls) {
         if (keys["ArrowUp"]) {
             // Quando a nave se mover, alterar o source do SVG para ser mostrado o fogo
-            if (spaceship.imgsrc != "img/spaceship_fire.svg") {
-                spaceship.imgsrc = "img/spaceship_fire.svg";
+            if (imgSpaceship.src != "img/spaceship_fire.svg") {
+                imgSpaceship.src = "img/spaceship_fire.svg";
             }
 
             // Aumentar a aceleração da nave quando a seta para cima for pressionada
@@ -342,8 +391,8 @@ function handleSpaceshipControls() {
             }
         } else {
             // Quando a nave estiver parada, alterar o source do SVG para não ser mostrado o fogo
-            if (spaceship.imgsrc != "img/spaceship.svg") {
-                spaceship.imgsrc = "img/spaceship.svg";
+            if (imgSpaceship.src != "img/spaceship.svg") {
+                imgSpaceship.src = "img/spaceship.svg";
             }
 
             // Diminuir a aceleração da nave quando a seta para cima for largada
@@ -384,80 +433,97 @@ function render() {
     // Limpar o ecrã todas as vezes que o render for executado
     ctx.clearRect(0, 0, W, H);
 
-    // Se verdade, o render não deverá ser mais executado
-    if (shouldRenderBeExecuted) {
-        // Mover a nave quando as setas forem pressionadas
-        handleSpaceshipControls();
+    // Mover a nave quando as setas forem pressionadas
+    handleSpaceshipControls();
 
-        // Desenhar os asteróides
-        arrayAsteroids.forEach(asteroid => {
+    // Desenhar os asteróides
+    asteroids.forEach(asteroid => {
+        if (asteroid.img.complete) {
+            // Se a imagem do asteróide já estiver carregada, mandar desenhar
             asteroid.draw();
             asteroid.update();
-        });
-
-        // Desenhar nave
-        spaceship.draw();
-        spaceship.update();
-
-        // Desenhar balas
-        bullets.forEach(bullet => {
-            bullet.draw();
-            bullet.update();
-        });
-
-        if (arrayAsteroids.length == 0) {
-
-            gameStats.round += 1
-            document.querySelector(".current-round .text").innerHTML = gameStats.round;
-            // Desenhar asteróide
-            for (let i = 0; i < 5; i++) {
-                // Verificar se o asteróide não nasce em cima da nave
-                arrayAsteroids.push(new Asteroid(0, 0, 1));
+        } else {
+            // Se não estiver carregada, esperar que carregue e só depois mandar desenhar
+            asteroid.img.onload = function() {
+                asteroid.draw();
+                asteroid.update();
             }
         }
+    });
 
+    // Desenhar nave
+    if (imgSpaceship.complete) {
+        // Se a imagem da nave já estiver carregada, mandar desenhar
+        spaceship.draw();
+        spaceship.update();
+    } else {
+        // Se não estiver carregada, esperar que carregue e só depois mandar desenhar
+        imgSpaceship.onload = function() {
+            spaceship.draw();
+            spaceship.update();
+        }
+    }
+
+    // Desenhar balas
+    bullets.forEach(bullet => {
+        bullet.draw();
+        bullet.update();
+    });
+
+    if (shouldRenderBeExecuted) {
         window.requestAnimationFrame(render);
     }
+    
 }
 
 function startGame() {
-    arrayAsteroids = [];
-    bullets = [];
+    // Limpar o ecrã todas as vezes que o render for executado
+    ctx.clearRect(0, 0, W, H);
+
+    // Forçar a limpeza de todos os elementos do jogo
+    spaceship = null;
+    asteroids = new Array();
+    bullets = new Array();
+
     // Esconder o menu e mostrar o canvas e as estatísticas
     document.querySelector(".game-over").style.display = "none";
     document.querySelector(".menu").style.display = "none";
     canvas.style.display = "block";
     document.querySelector(".game-stats").style.visibility = "visible";
     document.querySelector(".highest-score .text").innerHTML = gameStats.highestScore;
+    document.querySelector(".countdown .text").innerHTML = "3";
 
-    // Permitir o render
-    shouldRenderBeExecuted = true;
+    // Não permitir os controlos até que o countdown esteja completo
+    enableControls = false;
+
+    // Não permitir que o render se repita até que o countdown esteja terminado
+    shouldRenderBeExecuted = false;
 
     // Resetar as estatísticas
-    gameStats.points = 0;
+    gameStats.score = 0;
     gameStats.lives = 3;
     gameStats.round = 1;
 
     // Renderizar as estatísticas resetadas
     document.querySelectorAll(".lives img").forEach(heart => heart.src = "img/heart.png");
-    document.querySelector(".current-score .text").innerHTML = gameStats.points;
+    document.querySelector(".current-score .text").innerHTML = gameStats.score;
     document.querySelector(".current-round .text").innerHTML = gameStats.round;
     document.querySelector(".highest-score .text").innerHTML = gameStats.highestScore;
 
     // Desenhar nave
-    if (!spaceship) {
-        spaceship = new Spaceship();
-    }
+    spaceship = new Spaceship();
 
     // Desenhar asteróide
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < 5; i++) {
         // Verificar se o asteróide não nasce em cima da nave
-        arrayAsteroids.push(new Asteroid(0, 0, 1));
+        asteroids.push(new Asteroid(0, 0, 1));
     }
 
-    // Start the animation
+    // Executar o render pelo menos uma vez para o jogador poder ver tanto a posição da nave como a dos asteróides
     render();
-    console.log("The game has started");
+
+    // Começar o countdown
+    createCountdown();
 }
 
 setTimeout(function () {
@@ -484,3 +550,31 @@ function unmute() {
         });
     });
 }
+
+function runCountdown() {
+    const ELEMENT = document.querySelector(".countdown p");
+    ELEMENT.innerHTML = parseInt(ELEMENT.innerHTML) - 1;
+
+    if (parseInt(ELEMENT.innerHTML) == 0) {
+      // Parar de executar o countdown e limpar o ecrã
+      clearInterval(countdownInterval);
+
+      document.querySelector(".countdown").style.display = "none";
+
+      // Permitir os controlos após o countdown
+      enableControls = true;
+
+      shouldRenderBeExecuted = true;
+
+      // Start the animation
+      render();
+      console.log("The game has started");
+    }
+}
+
+function createCountdown() {
+    document.querySelector(".countdown").style.display = "flex";
+    countdownInterval = setInterval(function() { runCountdown(); }, 1000);
+}
+
+let countdownInterval = null;
