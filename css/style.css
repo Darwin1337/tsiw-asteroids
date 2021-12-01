@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=VT323&display=swap");
+@import url("animations.css");
 
 * {
   font-family: 'VT323', monospace;
@@ -14,70 +15,6 @@ html, body {
 body {
   background: url("../img/background.png");
 }
-
-/* Pop-Up */
-
-
-.pop-up{
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: url("../img/background.png");
-  color: white;
-  opacity: 1;
-  z-index: 2;
-}
-
-.pop-up div{
-  display: flex;
-  flex-direction: row;
-  gap: 15px;
-}
-
-/* Animations */
-
-
-#nave{
-  top: 30%;
-  left: -100px;
-  position: absolute;
-  visibility: hidden;
-  transition: transform,visibility;
-  transition-duration:1s;
-  z-index: 0;
-}
-
-#nave.animate{
-  top: 30%;
-  position: absolute;
-  transform: translateX(780px) rotate(90deg);
-  visibility: visible;
-}
-
-#play, #leaderboardImg, #quitImg{
-  top: 90px;
-  left:-870px;
-  position: relative;
-  visibility: hidden;
-  transition: transform,visibility;
-  transition-duration:1s;
-  z-index: 0;
-}
-
-#play.animate, #leaderboardImg.animate, #quitImg.animate{
-  transform: translateX(780px) rotate(90deg);
-  visibility: visible;
-}
-
-#nave.play{
-  transform: translateX(1035px) translateY(163px) rotate(0deg);
-  visibility: visible;
-}
-
 
 .intro {
   width: 100%;
@@ -96,11 +33,24 @@ body {
   color: white;
 }
 
-canvas {
-  display: none;
-  width: 100%;
+.pop-up {
+  position: absolute;
   height: 100%;
-  object-fit: contain;
+  width: 100%;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: url("../img/background.png");
+  color: white;
+  opacity: 1;
+  z-index: 2;
+}
+
+.pop-up div {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
 }
 
 .menu {
@@ -119,9 +69,7 @@ canvas {
 
 .menu nav ul li {
 	font-size: 3em;
-	letter-spacing: 0.2em;
-	height: 1.5em;
-	line-height: 1.5em;
+	height: 1em;
 	position: relative;
 	overflow: hidden;
 	margin: 0.5em;
@@ -148,6 +96,13 @@ canvas {
 
 .menu nav ul li:hover::before {
 	transform: scale(35.5);
+}
+
+canvas {
+  display: none;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .game-over {

@@ -1,0 +1,7 @@
+#nave-play, #nave-leaderboard, #nave-quit {
+    position: absolute;
+    transition: transform, visibility;
+    transition-duration: 1s;
+    z-index: 0;
+    visibility: hidden;
+}
