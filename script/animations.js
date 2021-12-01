@@ -35,8 +35,8 @@ BTN_PLAY.addEventListener("click", function (e) {
 });
 
 BTN_LEADERBOARD.addEventListener("mouseover", function (e) {
-    SPACESHIP2.style.top = (getCoordinates(e.target).y + (e.target.offsetHeight / 2)) - (document.querySelectorAll("ul img")[1].offsetHeight / 2) + "px";
-    SPACESHIP2.style.left = -document.querySelectorAll("ul img")[1].offsetWidth + "px";
+    SPACESHIP2.style.top = (getCoordinates(e.target).y + (e.target.offsetHeight / 2)) - (document.querySelectorAll("ul img")[0].offsetHeight / 2) + "px";
+    SPACESHIP2.style.left = -document.querySelectorAll("ul img")[0].offsetWidth + "px";
 
     SPACESHIP2.style.visibility = "visible";
     SPACESHIP2.style.transform = "translateX(" + getCoordinates(document.querySelector("nav")).x + "px) rotate(90deg)";
@@ -48,8 +48,8 @@ BTN_LEADERBOARD.addEventListener("mouseleave", function (e) {
 });
 
 BTN_QUIT.addEventListener("mouseover", function (e) {
-    SPACESHIP3.style.top = (getCoordinates(e.target).y + (e.target.offsetHeight / 2)) - (document.querySelectorAll("ul img")[1].offsetHeight / 2) + "px";
-    SPACESHIP3.style.left = -document.querySelectorAll("ul img")[1].offsetWidth + "px";
+    SPACESHIP3.style.top = (getCoordinates(e.target).y + (e.target.offsetHeight / 2)) - (document.querySelectorAll("ul img")[0].offsetHeight / 2) + "px";
+    SPACESHIP3.style.left = -document.querySelectorAll("ul img")[0].offsetWidth + "px";
 
     SPACESHIP3.style.visibility = "visible";
     SPACESHIP3.style.transform = "translateX(" + getCoordinates(document.querySelector("nav")).x + "px) rotate(90deg)";
