@@ -27,6 +27,7 @@ body {
 .intro h3 {
   color: white;
   font-size: 5em;
+  z-index: 1;
 }
 
 .intro p {

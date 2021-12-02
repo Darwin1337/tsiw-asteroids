@@ -561,7 +561,7 @@ setTimeout(function () {
     document.querySelector(".menu").style.display = "flex";
     document.querySelector(".pop-up").style.display = "flex";
     // startGame();
-}, 1000);
+}, 5000);
 
 function unmute() {
     const AUDIO = document.querySelector("#menu-hover");
