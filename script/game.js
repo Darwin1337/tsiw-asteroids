@@ -260,6 +260,13 @@ class Spaceship {
 
         // Variável usada para controlar a animação da nave entre o fim da explosão e o início do respawn
         this.isRespawning = false;
+
+        //
+        this.countHyperspace++;
+        this.clickTime=0;
+
+        //
+        this.forceExplosion=false;
     }
 
     draw() {
@@ -295,7 +302,8 @@ class Spaceship {
             // Verificar colisões da nave com asteróides
             for (let i = 0; i < asteroids.length; i++) {
                 // Se entrar neste if statement, quer dizer que a bala atingiu um asteróide
-                if (areObjectsColliding(asteroids[i].getCenter("x"), asteroids[i].getCenter("y"), this.getCenter("x"), this.getCenter("y"), spaceship.width / 2, asteroids[i].width / 2)) {
+                if (areObjectsColliding(asteroids[i].getCenter("x"), asteroids[i].getCenter("y"), this.getCenter("x"), this.getCenter("y"), spaceship.width / 2, asteroids[i].width / 2) || this.forceExplosion)  {
+                
                     // Decrementar e renderizar a quantidade de vidas do jogador
                     gameStats.lives--;
                     document.querySelector(".lives").innerHTML = "";
@@ -326,6 +334,13 @@ class Spaceship {
                         // Impedir o utilizador de controlar a nave
                         enableControls = false;
                     }
+                    //
+                    if (asteroids[i].level < 3 && !this.forceExplosion) {
+                        // Se o nível do asteróide atingido não for o último, dividi-lo em 2 com nível superior
+                        asteroids.push(new Asteroid(asteroids[i].x + 2, asteroids[i].y + 2, asteroids[i].level + 1));
+                        asteroids.push(new Asteroid(asteroids[i].x - 2, asteroids[i].y - 2, asteroids[i].level + 1));
+                        asteroids.splice(i,1)
+                    }
 
                     break;
                 }
@@ -353,13 +368,14 @@ class Spaceship {
                 }
 
                 if (isSpawnDoable) {
-                    spaceship.x = (W / 2) - (this.width / 2);
-                    spaceship.y = (H / 2) - (this.height / 2)
-                    spaceship.curAccel = 0;
-                    spaceship.angle = 0;
+                    this.x = (W / 2) - (this.width / 2);
+                    this.y = (H / 2) - (this.height / 2)
+                    this.curAccel = 0;
+                    this.angle = 0;
                     enableControls = true;
                     this.isExploding = false;
                     this.isRespawning = false;
+                    this.forceExplosion=false;
                 }
             }
         }
@@ -417,6 +433,7 @@ class Bullet {
 }
 
 window.addEventListener("keydown", event => {
+    
     keys[event.key] = true;
     event.preventDefault();
 });
@@ -425,8 +442,32 @@ window.addEventListener("keyup", event => {
     keys[event.key] = false;
 });
 
+
 function handleSpaceshipControls() {
     if (enableControls) {
+    
+        //clicar no x e dar spawn a nave numa posição aleatoria -- Ainda nao esta feito
+        if(keys["x"]){
+            if(new Date().getTime()-spaceship.clickTime<=5000){
+                spaceship.countHyperspace++;
+                let rnd = Math.floor(Math.random() * (100 - 1) ) + 1; 
+                if (rnd <= 25 * (spaceship.countHyperspace - 1)) {
+                    spaceship.countHyperspace=0;
+                    spaceship.forceExplosion=true;
+                }
+                spaceship.x=Math.random()*W-40;
+                spaceship.y=Math.random()*H-40;
+            }
+            else{
+                spaceship.countHyperspace = 1
+                spaceship.x=Math.random()*W-40;
+                spaceship.y=Math.random()*H-40;
+            }
+            spaceship.clickTime=new Date().getTime()
+            
+            keys["x"]=false
+        }
+
         if (keys["ArrowUp"]) {
             // Quando a nave se mover, alterar o source do SVG para ser mostrado o fogo
             if (imgSpaceship.src != "img/spaceship_fire.svg") {
