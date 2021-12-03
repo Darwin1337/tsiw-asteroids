@@ -60,6 +60,9 @@ let bullets = new Array();
 // Array que irá conter todos os asteróides ativos
 let asteroids = new Array();
 
+// Variável auxiliar para dar vidas passado x pontos
+let gamescore=0;
+
 // Variável que irá ficar com as imagens da nave sem fogo, da nave com fogo e da explosão para o new Image() não estar sempre a ser chamado no draw()
 let imgSpaceship = new Image();
 imgSpaceship.src = "img/spaceship.svg";
@@ -162,6 +165,8 @@ class Asteroid {
             this.y = 0 - this.height;
         }
 
+       
+
         // Atualiza o movimento do asteróide
         this.x += this.dX;
         this.y += this.dY;
@@ -200,6 +205,18 @@ class Asteroid {
                     // Desenhar asteróides
                     for (let i = 0; i < 5; i++) {
                         asteroids.push(new Asteroid(0, 0, 1));
+                    }
+                }
+                //Verificar se o utiliador ganhou pontos suficientes para ganhar vida extra
+                if(gameStats.lives< MAX_LIVES  && gameStats.score>=gamescore+POINTS_BETWEEN_LIVES){
+                    gamescore=gameStats.score;
+                    gameStats.lives+=1
+                    document.querySelector(".lives").innerHTML=""
+                    for (let j = 0; j < gameStats.lives; j++) {
+                        document.querySelector(".lives").innerHTML += '<img src="img/heart.png" style="width: 40px;">\n';
+                    }
+                    for (let j = 0; j < MAX_LIVES - gameStats.lives; j++) {
+                        document.querySelector(".lives").innerHTML += '<img src="img/heart_gray.png" style="width: 40px;">\n';
                     }
                 }
 
@@ -286,7 +303,7 @@ class Spaceship {
                         document.querySelector(".lives").innerHTML += '<img src="img/heart.png" style="width: 40px;">\n';
                     }
 
-                    for (let j = 0; j < 3 - gameStats.lives; j++) {
+                    for (let j = 0; j < MAX_LIVES - gameStats.lives; j++) {
                         document.querySelector(".lives").innerHTML += '<img src="img/heart_gray.png" style="width: 40px;">\n';
                     }
 
@@ -504,6 +521,8 @@ function render() {
     if (shouldRenderBeExecuted) {
         window.requestAnimationFrame(render);
     }
+
+    
 }
 
 function startGame() {
@@ -535,7 +554,10 @@ function startGame() {
     gameStats.round = 1;
 
     // Renderizar as estatísticas resetadas
-    document.querySelectorAll(".lives img").forEach(heart => heart.src = "img/heart.png");
+    for(let i=0; i<3;i++){
+        document.querySelectorAll(".lives img")[i].src = "img/heart.png";
+    }
+    
     document.querySelector(".current-score .text").innerHTML = gameStats.score;
     document.querySelector(".current-round .text").innerHTML = gameStats.round;
     document.querySelector(".highest-score .text").innerHTML = gameStats.highestScore;
