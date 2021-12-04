@@ -60,6 +60,9 @@ let bullets = new Array();
 // Array que irá conter todos os asteróides ativos
 let asteroids = new Array();
 
+//
+let leaderboard = localStorage.leaderboard ? JSON.parse(localStorage.leaderboard) : [];
+
 // Variável que irá ficar com as imagens da nave sem fogo, da nave com fogo e da explosão para o new Image() não estar sempre a ser chamado no draw()
 let imgSpaceship = new Image();
 imgSpaceship.src = "img/spaceship.svg";
@@ -68,11 +71,11 @@ imgExplosion.src = "img/explosion.png";
 
 // Variável que irá conter todas as informações do jogador e das suas estatísticas
 let gameStats = {
-    name: "John Doe",
+    name: "",
     round: 1,
     score: 0,
-    lives: 3, // Com quantas vidas é que o jogador começará
-    highestScore: localStorage.highscore ? localStorage.highscore : 0
+    lives: 3,
+    bestScore: 0// Com quantas vidas é que o jogador começará
 }
 
 // Se esta variável estiver a true, o utilizador não poderá usar os controlos (marioritariamente usado para quando a nave é atingida por um asteróide)
@@ -184,11 +187,25 @@ class Asteroid {
                 document.querySelector(".current-score .text").innerHTML = gameStats.score;
 
                 // Verificar se a pontuação atual é maior que a melhor pontuação
+                // for (let i = 0; i < leaderboard.length; i++) {
+                //     if (leaderboard.gameStats.score > leaderboard.gameStats.score[i-1] ) {
+                //         gameStats.bestScore = leaderboard.gameStats.score
+                //         document.querySelector(".highest-score .text").innerHTML = leaderboard.gamestats.score
+                //     }
+                    
+                // }
                 if (gameStats.score > gameStats.highestScore) {
                     localStorage.setItem("highscore", gameStats.score);
                     gameStats.highestScore = gameStats.score;
                     document.querySelector(".highest-score .text").innerHTML = gameStats.score;
                 }
+
+                //
+                // if (leaderboard.length < 10) {
+                //     leaderboard.push(gameStats)
+                //     localStorage.setItem("leaderboard", leaderboard)
+                // }
+
 
                 // Remover o asteróide atingido
                 asteroids.splice(asteroids.findIndex(asteroid => asteroid.id == this.id), 1);
@@ -401,7 +418,6 @@ class Bullet {
 
 window.addEventListener("keydown", event => {
     keys[event.key] = true;
-    event.preventDefault();
 });
 
 window.addEventListener("keyup", event => {
@@ -522,6 +538,7 @@ function startGame() {
     document.querySelector(".game-stats").style.visibility = "visible";
     document.querySelector(".highest-score .text").innerHTML = gameStats.highestScore;
     document.querySelector(".countdown .text").innerHTML = "3";
+    gameStats.name = document.getElementById("name").value;
 
     // Não permitir os controlos até que o countdown esteja completo
     enableControls = false;
