@@ -12,7 +12,7 @@
 </head>
 
 <body>
-  <audio id="menu-hover" src="assets\menu-hover.wav"></audio>
+  <audio id="menu-hover" src="assets/menu-hover.wav"></audio>
 
   <div class="pop-up">
     <h1>Este jogo utiliza efeitos sonoros para uma experiência mais imersiva</h1>
@@ -38,24 +38,101 @@
   <img src="img/spaceship.svg" id="nave-play">
 
   <div class="menu">
+    <p>Asteróides</p>
     <nav>
       <ul>
-        <div class="user_data form">
-          <input type="input" class="form_name" placeholder="Name:" name="name" id='name' minlength="3" maxlength="15" required />
-          <label for="name" class="label_name">Name: </label>
+        <div class="username">
+          <input type="text" placeholder="Nome" id="username" minlength="3" maxlength="15" />
+          <label for="username">Nome </label>
         </div>
 
-        <li id="play"><span>PLAY</span></li>
+        <li id="play"><span>JOGAR</span></li>
 
         <img src="img/spaceship_fire.svg" id="nave-leaderboard">
-        <li id="leaderboard"><span >LEADERBOARD</span></li>
+        <li id="leaderboard" onclick="renderLeaderboard();"><span >CLASSIFICAÇÃO</span></li>
 
         <img src="img/spaceship_fire.svg" id="nave-quit">
-        <li id="quit"><span onclick="window.close();">QUIT</span></li>
+        <li id="quit"><span onclick="window.close();">SAIR</span></li>
       </ul>
     </nav>
   </div>
 
+  <div class="leaderboard">
+    <p>Tabela de classificação</p>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nome</th>
+          <th>Pontuação</th>
+          <th>Nível</th>
+        </tr>
+      </thead>
+      <tbody id="render-lb">
+        <tr>
+          <td>1</td>
+          <td>DARWIN</td>
+          <td>24642</td>
+          <td>8</td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>DARWIN</td>
+          <td>24642</td>
+          <td>8</td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>DARWIN</td>
+          <td>24642</td>
+          <td>8</td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>DARWIN</td>
+          <td>24642</td>
+          <td>8</td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>DARWIN</td>
+          <td>24642</td>
+          <td>8</td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>DARWIN</td>
+          <td>24642</td>
+          <td>8</td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>DARWIN</td>
+          <td>24642</td>
+          <td>8</td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>DARWIN</td>
+          <td>24642</td>
+          <td>8</td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>DARWIN</td>
+          <td>24642</td>
+          <td>8</td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>DARWIN</td>
+          <td>24642</td>
+          <td>8</td>
+        </tr>
+      </tbody>
+    </table>
+    <button type="button" onclick="document.querySelector('.leaderboard').style.display = 'none';">Voltar</button>
+  </div>
 
   <div class="game-over">
     <p>GAME OVER</p>

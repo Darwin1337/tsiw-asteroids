@@ -3,8 +3,7 @@
 // http://www.classicgaming.cc/classics/asteroids/play-guide
 // https://games.aarp.org/games/atari-asteroids
 // https://youtu.be/WYSupJ5r2zo
-// Foram apenas alterados alguns valores que, após as nossas simplificações, afetariam o jogo ao utilizador. Estes valores estão declarados no topo do documento
-// como constantes, podendo serem facilmente alterados para os valores originais
+// Foram apenas alterados alguns valores que, após as nossas simplificações, afetariam o jogo ao utilizador.
 
 const canvas = document.querySelector("canvas");
 canvas.width = window.innerWidth - 20;
@@ -24,35 +23,13 @@ const ASTEROID_LEVELS = [
 
 // TO DO
 // Animação da introdução (aperfeiçoar);
-// Guardar nome do jogador;
-// Leaderboard local com nome, pontuação e ronda;
-// O jogador deverá poder enviar a nave para o hiperespaço, causando-a a desaparecer e aparecer num lugar aleatório no ecrã, com o risco de se autodestruír ou nascer em cima de um asteróide;
-// A cada X pontos dar uma vida ao utilizador (que no máximo pode ter 5);
-// Tornar cada ronda mais difícil até o jogador atingir os 30000 pontos, a partir daí terá sempre a mesma dificuldade;
-// Resolver problema de alguns elementos SVG não funcionarem em certos browsers;
-// As balas, se excederem os limites do canvas, deverão aparecer no lugar refletido;
-// Só poderá haver 4 balas no ecrã de cada vez e as mesmas são removidas após terem percorrido uma certa distância.
-
-// De quantos em quantos pontos é que o utilizador recebe uma vida
-const POINTS_BETWEEN_LIVES = 5000;
-
-// No jogo original, apenas são permitas 4 balas no ecrã de cada vez
-const BULLETS_ALLOWED = 4;
-
-// Quando o jogador atinge os 30000 pontos a dificuldade estabilizará
-const DIFFICULTY_MULTIPLIER_LIMIT = 30000;
-
-// Máximo de vidas que o utilizador poderá ter
-const MAX_LIVES = 5;
-
-// Guardar nome do utilizador
-let playerName = "";
-
-// Array que irá ficar com as teclas pressionadas
-let keys = new Array();
+// Resolver problema de alguns elementos SVG não funcionarem em certos browsers.
 
 // Variável que irá conter o objeto da nave
 let spaceship = null;
+
+// Array que irá ficar com as teclas pressionadas
+let keys = new Array();
 
 // Array que irá conter todas as balas disparadas
 let bullets = new Array();
@@ -60,29 +37,53 @@ let bullets = new Array();
 // Array que irá conter todos os asteróides ativos
 let asteroids = new Array();
 
-// Variável auxiliar para dar vidas passado x pontos
-let gamescore=0;
-
-// Variável que irá ficar com as imagens da nave sem fogo, da nave com fogo e da explosão para o new Image() não estar sempre a ser chamado no draw()
-let imgSpaceship = new Image();
-imgSpaceship.src = "img/spaceship.svg";
-let imgExplosion = new Image();
-imgExplosion.src = "img/explosion.png";
-
-// Variável que irá conter todas as informações do jogador e das suas estatísticas
-let gameStats = {
-    name: "",
-    round: 1,
-    score: 0,
-    lives: 3,
-    bestScore: 0// Com quantas vidas é que o jogador começará
-}
-
 // Se esta variável estiver a true, o utilizador não poderá usar os controlos (marioritariamente usado para quando a nave é atingida por um asteróide)
 let enableControls = false;
 
 // Variável que irá deicdir se renderização deverá ser executada ou não
 let shouldRenderBeExecuted = false;
+
+// Variável que irá ficar com as imagens da nave sem fogo, da nave com fogo e da explosão para o new Image() não estar sempre a ser chamado no draw()
+let imgSpaceship = new Image();
+imgSpaceship.src = "img/spaceship.svg";
+
+let imgExplosion = new Image();
+imgExplosion.src = "img/explosion.png";
+
+// Variável que irá conter todas as informações do jogador e das suas estatísticas
+let gameStats = {
+    name: "John Doe",
+    round: 1,
+    score: 0,
+    lives: 3 // Com quantas vidas é que o jogador começará
+}
+
+// Se não houver jogadores na leaderboard, adicionar 10 com valores aleatórios, só para estar preenchido
+localStorage.setItem("leaderboard", localStorage.leaderboard ? localStorage.leaderboard : JSON.stringify([{"name":"Diogo","score":6550,"round":2},{"name":"João","score":2500,"round":1},{"name":"Paulo","score":2400,"round":1},{"name":"Rodrigo","score":2100,"round":1},{"name":"Ricardo","score":2050,"round":1},{"name":"Carlos","score":1600,"round":1},{"name":"Sofia","score":1400,"round":1},{"name":"Joana","score":1250,"round":1},{"name":"Cristiano","score":950,"round":1},{"name":"Gonçalo","score":850,"round":1}]));
+
+let leaderboard = JSON.parse(localStorage.leaderboard);
+
+// Quantidade de asteróides a nascer na 1.ª ronda
+// Este número será incrementado por 1 todas as vezes que uma ronda for completa até o jogador atingir 30000 pontos
+let quantAsteroids = 4;
+
+// Quantas balas são permitidas no ecrã de cada vez
+const BULLETS_ALLOWED = 4;
+
+// Distância máxima que as balas poderão percorrer até serem eliminadas
+const BULLET_DISTANCE = 0.65 * W; // 65% da largura do canvas
+
+// Quando o jogador atinge X pontos a dificuldade estabilizará
+const DIFFICULTY_MULTIPLIER_LIMIT = 25000;
+
+// Máximo de vidas que o utilizador poderá ter
+const MAX_LIVES = 5;
+
+// De quantos em quantos pontos é que o utilizador recebe uma vida
+const POINTS_BETWEEN_LIVES = 5000;
+
+// Delay mínimo entre cada hyperspace. Se este delay não for respeitado a probabilidade da nave explodir aumenta
+const TIME_HYPERSPACE = 3000;
 
 class Asteroid {
     constructor(x, y, level) {
@@ -165,8 +166,6 @@ class Asteroid {
             this.y = 0 - this.height;
         }
 
-       
-
         // Atualiza o movimento do asteróide
         this.x += this.dX;
         this.y += this.dY;
@@ -189,43 +188,77 @@ class Asteroid {
                 document.querySelector(".current-score .text").innerHTML = gameStats.score;
 
                 // Verificar se a pontuação atual é maior que a melhor pontuação
-                // for (let i = 0; i < leaderboard.length; i++) {
-                //     if (leaderboard.gameStats.score > leaderboard.gameStats.score[i-1] ) {
-                //         gameStats.bestScore = leaderboard.gameStats.score
-                //         document.querySelector(".highest-score .text").innerHTML = leaderboard.gamestats.score
-                //     }
-                    
-                // }
-                if (gameStats.score > gameStats.highestScore) {
-                    localStorage.setItem("highscore", gameStats.score);
-                    gameStats.highestScore = gameStats.score;
-                    document.querySelector(".highest-score .text").innerHTML = gameStats.score;
+
+                // Se ainda não hovuerem 10 jogadores presentes na leaderboard
+                if (leaderboard.length < 10) {
+                    // Verificar se o nome ja existe
+                    const idxPlayer = leaderboard.findIndex(player => player.name.toLowerCase() == gameStats.name.toLowerCase());
+                    if (idxPlayer > -1) {
+                        if (gameStats.score > leaderboard[idxPlayer].score) {
+                            // Se o jogador já existir, simplesmente atualizar-lhe o score e a ronda, se os mesmos forem superiores
+                            leaderboard[idxPlayer].score = gameStats.score;
+                            leaderboard[idxPlayer].round = gameStats.round;
+                        }
+                    } else {
+                        // Se não existir, adicionar um novo jogador à leaderboard
+                        leaderboard.push({
+                            name: gameStats.name,
+                            score: gameStats.score,
+                            round: gameStats.round
+                        });
+                    }
+                // Se já houverem 10 jogadores presentes na leaderboard
+                } else {
+                    // Verificar se o score é worthy the estar na leaderboard
+                    if (gameStats.score > leaderboard[9].score) {
+                        // Verificar se o nome ja existe
+                        const idxPlayer = leaderboard.findIndex(player => player.name.toLowerCase() == gameStats.name.toLowerCase())
+                        if (idxPlayer > -1) {
+                            if (gameStats.score > leaderboard[idxPlayer].score) {
+                                // Se o jogador já existir, simplesmente atualizar-lhe o score e a ronda
+                                leaderboard[idxPlayer].score = gameStats.score;
+                                leaderboard[idxPlayer].round = gameStats.round;
+                            }
+                        } else {
+                            // Se não existir, remover o último jogador e adicionar o novo
+                            leaderboard[9].name = gameStats.name;
+                            leaderboard[9].score = gameStats.score;
+                            leaderboard[9].round = gameStats.round;
+                        }
+                    }
                 }
 
-                //
-                // if (leaderboard.length < 10) {
-                //     leaderboard.push(gameStats)
-                //     localStorage.setItem("leaderboard", leaderboard)
-                // }
-
+                // Organizar o array de acordo com as pontuações e mostrar o highscore no ecrã
+                leaderboard.sort((a, b) => a.score > b.score ? -1 : 1);
+                localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+                document.querySelector(".highest-score .text").innerHTML = leaderboard[0].score;
 
                 // Remover o asteróide atingido
                 asteroids.splice(asteroids.findIndex(asteroid => asteroid.id == this.id), 1);
 
                 // Se entrar aqui, o jogador destruiu todos os asteróides e passou de nível
-                if (asteroids.length == 0) {
-                    gameStats.round += 1
+                if (asteroids.length == 0 && !spaceship.isExploding) {
+                    gameStats.round += 1;
                     document.querySelector(".current-round .text").innerHTML = gameStats.round;
-                    // Desenhar asteróides
-                    for (let i = 0; i < 5; i++) {
+
+                    // Remover todas as balas para impedir que novos asteróides sejam atingidos por balas antigas
+                    bullets = new Array();
+
+                    // Se o jogador atingir os 30000 pontos => estagnar o jogo
+                    // Se não, incrementar um asteróide cada vez que uma ronda é concluída
+                    quantAsteroids = gameStats.score >= DIFFICULTY_MULTIPLIER_LIMIT ? quantAsteroids : quantAsteroids += 1;
+                    
+                    // Criar instâncias dos asteróides
+                    for (let i = 0; i < quantAsteroids; i++) {
                         asteroids.push(new Asteroid(0, 0, 1));
                     }
                 }
-                //Verificar se o utiliador ganhou pontos suficientes para ganhar vida extra
-                if(gameStats.lives< MAX_LIVES  && gameStats.score>=gamescore+POINTS_BETWEEN_LIVES){
-                    gamescore=gameStats.score;
-                    gameStats.lives+=1
-                    document.querySelector(".lives").innerHTML=""
+                // Verificar se o utiliador ganhou pontos suficientes para ganhar a vida extra
+                if (gameStats.lives < MAX_LIVES && gameStats.score >= spaceship.lastExtraLife + POINTS_BETWEEN_LIVES){
+                    spaceship.lastExtraLife += POINTS_BETWEEN_LIVES;
+                    gameStats.lives += 1;
+
+                    document.querySelector(".lives").innerHTML = "";
                     for (let j = 0; j < gameStats.lives; j++) {
                         document.querySelector(".lives").innerHTML += '<img src="img/heart.png" style="width: 40px;">\n';
                     }
@@ -275,12 +308,18 @@ class Spaceship {
         // Variável usada para controlar a animação da nave entre o fim da explosão e o início do respawn
         this.isRespawning = false;
 
-        //
-        this.countHyperspace++;
-        this.clickTime=0;
+        // Variável auxiliar para dar vidas passado X pontos
+        this.lastExtraLife = 0;
 
-        //
-        this.forceExplosion=false;
+        // Variável que irá guardar a quantidade de vezes que o botão do hyperspace é pressionado
+        // Se esse botão for pressionado várias vezes, a probabilidade de a nave explodir aumenta
+        this.countHyperspace = 0;
+
+        // Variável que irá guardar a data/hora que o último hyperspace foi utilizado
+        this.lastHyperspace = 0;
+
+        // Se verdadeira a nave explodirá. Usado quando a nave é explodida devido a múltiplos usos do hyperspace
+        this.forceExplosion = false;
     }
 
     draw() {
@@ -316,10 +355,11 @@ class Spaceship {
             // Verificar colisões da nave com asteróides
             for (let i = 0; i < asteroids.length; i++) {
                 // Se entrar neste if statement, quer dizer que a bala atingiu um asteróide
-                if (areObjectsColliding(asteroids[i].getCenter("x"), asteroids[i].getCenter("y"), this.getCenter("x"), this.getCenter("y"), spaceship.width / 2, asteroids[i].width / 2) || this.forceExplosion)  {
-                
+                if (areObjectsColliding(asteroids[i].getCenter("x"), asteroids[i].getCenter("y"), this.getCenter("x"), this.getCenter("y"), spaceship.width / 2, asteroids[i].width / 2) || this.forceExplosion) {
                     // Decrementar e renderizar a quantidade de vidas do jogador
                     gameStats.lives--;
+                    gameStats.lives = gameStats.lives < 0 ? 0 : gameStats.lives;
+
                     document.querySelector(".lives").innerHTML = "";
                     for (let j = 0; j < gameStats.lives; j++) {
                         document.querySelector(".lives").innerHTML += '<img src="img/heart.png" style="width: 40px;">\n';
@@ -328,6 +368,13 @@ class Spaceship {
                     for (let j = 0; j < MAX_LIVES - gameStats.lives; j++) {
                         document.querySelector(".lives").innerHTML += '<img src="img/heart_gray.png" style="width: 40px;">\n';
                     }
+
+                    if (asteroids[i].level < 3 && !this.forceExplosion) {
+                        // Se o nível do asteróide atingido não for o último, dividí-lo em 2 com nível superior
+                        asteroids.push(new Asteroid(asteroids[i].x + 2, asteroids[i].y + 2, asteroids[i].level + 1));
+                        asteroids.push(new Asteroid(asteroids[i].x - 2, asteroids[i].y - 2, asteroids[i].level + 1));
+                    }
+                    asteroids.splice(i, 1);
 
                     // Se o utilizador não tiver mais vidas, mostrar ecrã de game over
                     if (gameStats.lives < 1) {
@@ -347,13 +394,6 @@ class Spaceship {
 
                         // Impedir o utilizador de controlar a nave
                         enableControls = false;
-                    }
-                    //
-                    if (asteroids[i].level < 3 && !this.forceExplosion) {
-                        // Se o nível do asteróide atingido não for o último, dividi-lo em 2 com nível superior
-                        asteroids.push(new Asteroid(asteroids[i].x + 2, asteroids[i].y + 2, asteroids[i].level + 1));
-                        asteroids.push(new Asteroid(asteroids[i].x - 2, asteroids[i].y - 2, asteroids[i].level + 1));
-                        asteroids.splice(i,1)
                     }
 
                     break;
@@ -389,7 +429,9 @@ class Spaceship {
                     enableControls = true;
                     this.isExploding = false;
                     this.isRespawning = false;
-                    this.forceExplosion=false;
+                    this.forceExplosion = false;
+                    this.lastHyperspace = 0;
+                    this.countHyperspace = 0;
                 }
             }
         }
@@ -422,6 +464,9 @@ class Bullet {
 
         // Delay entre o disparo das balas em milissegundos
         this.delay = 150;
+        
+        // Distância percorrida pela bala
+        this.distance = 0;
     }
 
     draw() {
@@ -433,12 +478,26 @@ class Bullet {
     }
 
     update() {
-        // Remover as balas que já saíram do ecrã
-        for (let i = 0; i < bullets.length; i++) {
-            if (bullets[i].y < 0 - this.r) {
-                bullets.splice(i, 1);
-            }
+        // Se o bala ultrapassar os limites do canvas, trocar-lhe as coordenadas
+        if (this.x < 0 - (this.r * 2)) {
+            this.x = W + (this.r * 2);
+        } else if (this.x > W + (this.r * 2)) {
+            this.x = 0 - (this.r * 2);
         }
+
+        if (this.y < 0 - (this.r * 2)) {
+            this.y = H + (this.r * 2);
+        } else if (this.y > H + (this.r * 2)) {
+            this.y = 0 - (this.r * 2);
+        }
+
+        // Se a distância for superior à máxima autorizada, remover a bala
+        if (this.distance > BULLET_DISTANCE) {
+            bullets.splice(bullets.findIndex(bala => bala.date == this.date), 1);
+        }
+
+        // Atualizar a distância percorrida pela bala
+        this.distance += Math.sqrt(Math.pow(Math.cos(this.angle - (Math.PI / 2)) * this.vel, 2) + Math.pow(Math.sin(this.angle - (Math.PI / 2)) * this.vel, 2));
 
         // Atualizar o movimento das balas que estão ativas 
         this.x += Math.cos(this.angle - (Math.PI / 2)) * this.vel;
@@ -447,40 +506,18 @@ class Bullet {
 }
 
 window.addEventListener("keydown", event => {
-    
     keys[event.key] = true;
+    // Como o jogo está em modo fullscreen e necessitamos de obter o input para o nome do utilizador
+    // o preventDefault não faz diferença nenhuma
+    // event.preventDefault();
 });
 
 window.addEventListener("keyup", event => {
     keys[event.key] = false;
 });
 
-
 function handleSpaceshipControls() {
     if (enableControls) {
-    
-        //clicar no x e dar spawn a nave numa posição aleatoria -- Ainda nao esta feito
-        if(keys["x"]){
-            if(new Date().getTime()-spaceship.clickTime<=5000){
-                spaceship.countHyperspace++;
-                let rnd = Math.floor(Math.random() * (100 - 1) ) + 1; 
-                if (rnd <= 25 * (spaceship.countHyperspace - 1)) {
-                    spaceship.countHyperspace=0;
-                    spaceship.forceExplosion=true;
-                }
-                spaceship.x=Math.random()*W-40;
-                spaceship.y=Math.random()*H-40;
-            }
-            else{
-                spaceship.countHyperspace = 1
-                spaceship.x=Math.random()*W-40;
-                spaceship.y=Math.random()*H-40;
-            }
-            spaceship.clickTime=new Date().getTime()
-            
-            keys["x"]=false
-        }
-
         if (keys["ArrowUp"]) {
             // Quando a nave se mover, alterar o source do SVG para ser mostrado o fogo
             if (imgSpaceship.src != "img/spaceship_fire.svg") {
@@ -516,12 +553,29 @@ function handleSpaceshipControls() {
         }
 
         if (keys[" "]) { // Lidar com a tecla de espaço
-            // Se a última bala tiver sido disparada há mais de X milissegudos atrás, permitir novo disparo
+            // Se a última bala tiver sido disparada há mais de X milissegudos atrás e existirem menos do máximo no ecrã, permitir novo disparo
             const LAST_BULLET = bullets[bullets.length - 1];
-
-            if (bullets.length == 0 || new Date().getTime() - LAST_BULLET.date.getTime() >= LAST_BULLET.delay) {
+            if ((bullets.length < BULLETS_ALLOWED) && (bullets.length == 0 || new Date().getTime() - LAST_BULLET.date.getTime() >= LAST_BULLET.delay)) {
                 bullets.push(new Bullet());
             }
+        }
+
+        if (keys["x"]) { // Botão para ativar o hyperspace
+            // Se desde a última vez que o jogador utilizou o hyperspace tiverem passado 5 segundos => correr um random para ver se a nave explodirá
+            if (new Date().getTime() - spaceship.lastHyperspace <= TIME_HYPERSPACE){
+                spaceship.countHyperspace++;
+                if (Math.floor(Math.random() * (100 - 1) ) + 1 <= 25 * (spaceship.countHyperspace - 1)) {
+                    // Explodir a nave
+                    spaceship.countHyperspace = 0;
+                    spaceship.forceExplosion = true;
+                }
+            } else {
+                spaceship.countHyperspace = 1;
+            }
+            spaceship.x = Math.floor(Math.random() * ((W - spaceship.width) - 0 + 1) + 0);
+            spaceship.y = Math.floor(Math.random() * ((H - spaceship.height) - 0 + 1) + 0);
+            spaceship.lastHyperspace = new Date().getTime();
+            keys["x"] = false;
         }
     }
 }
@@ -575,12 +629,10 @@ function render() {
     if (shouldRenderBeExecuted) {
         window.requestAnimationFrame(render);
     }
-
-    
 }
 
 function startGame() {
-    // Limpar o ecrã todas as vezes que o render for executado
+    // Limpar o ecrã
     ctx.clearRect(0, 0, W, H);
 
     // Forçar a limpeza de todos os elementos do jogo
@@ -593,9 +645,8 @@ function startGame() {
     document.querySelector(".menu").style.display = "none";
     canvas.style.display = "block";
     document.querySelector(".game-stats").style.visibility = "visible";
-    document.querySelector(".highest-score .text").innerHTML = gameStats.highestScore;
     document.querySelector(".countdown .text").innerHTML = "3";
-    gameStats.name = document.getElementById("name").value;
+    quantAsteroids = 4;
 
     // Não permitir os controlos até que o countdown esteja completo
     enableControls = false;
@@ -607,21 +658,25 @@ function startGame() {
     gameStats.score = 0;
     gameStats.lives = 3;
     gameStats.round = 1;
+    gameStats.name = document.querySelector(".username input").value.trim();
 
     // Renderizar as estatísticas resetadas
-    for(let i=0; i<3;i++){
+    for (let i = 0; i < gameStats.lives; i++) {
         document.querySelectorAll(".lives img")[i].src = "img/heart.png";
     }
-    
+    for (let i = gameStats.lives; i < MAX_LIVES; i++) {
+        document.querySelectorAll(".lives img")[i].src = "img/heart_gray.png";
+    }
+
     document.querySelector(".current-score .text").innerHTML = gameStats.score;
     document.querySelector(".current-round .text").innerHTML = gameStats.round;
-    document.querySelector(".highest-score .text").innerHTML = gameStats.highestScore;
+    document.querySelector(".highest-score .text").innerHTML = leaderboard.length > 0 ? leaderboard[0].score : 0;
 
-    // Desenhar nave
+    // Criar instância da nave
     spaceship = new Spaceship();
 
-    // Desenhar asteróide
-    for (let i = 0; i < 5; i++) {
+    // Criar instâncias dos asteróides
+    for (let i = 0; i < quantAsteroids; i++) {
         // Verificar se o asteróide não nasce em cima da nave
         asteroids.push(new Asteroid(0, 0, 1));
     }
@@ -638,7 +693,7 @@ setTimeout(function () {
     document.querySelector(".menu").style.display = "flex";
     document.querySelector(".pop-up").style.display = "flex";
     // startGame();
-}, 5000);
+}, 1000);
 
 function unmute() {
     const AUDIO = document.querySelector("#menu-hover");
@@ -663,6 +718,22 @@ function mainMenu() {
     canvas.style.display = "none";
     document.querySelector(".game-stats").style.visibility = "hidden";
     document.querySelector(".menu").style.display = "flex";
+}
+
+function renderLeaderboard() {
+    document.querySelector('.leaderboard').style.display = 'flex';
+    const RENDER = document.querySelector("#render-lb");
+    RENDER.innerHTML = "";
+
+    for (let i = 0; i < leaderboard.length; i++) {
+        RENDER.innerHTML += `
+        <tr>
+            <td>${ i + 1 }</td>
+            <td>${ leaderboard[i].name }</td>
+            <td>${ leaderboard[i].score }</td>
+            <td>${ leaderboard[i].round }</td>
+        </tr>`;
+    }
 }
 
 function runCountdown() {

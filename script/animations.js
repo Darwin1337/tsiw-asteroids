@@ -20,19 +20,23 @@ function stopAnimation() {
 }
 
 BTN_PLAY.addEventListener("click", function (e) {
-    BTN_PLAY.removeEventListener("mouseleave", stopAnimation);
-    SPACESHIP1.style.visibility = "visible";
-    const YCOORD = ((window.innerHeight / 2) - (document.querySelectorAll("ul img")[0].offsetHeight / 2)) - parseFloat(SPACESHIP1.style.top.replace('px', ''));
-    const XCOORD = (window.innerWidth / 2) + (document.querySelectorAll("ul img")[0].offsetWidth / 2);
-    SPACESHIP1.style.transform = "translateX(" + XCOORD + "px) translateY(" + YCOORD + "px) rotate(0deg)";
-    document.querySelector(".menu").style.display = "none";
-
-    setTimeout(function () {
-        SPACESHIP1.style.display = "none";
-        SPACESHIP1.style.visibility = "hidden";
-        SPACESHIP1.style.transform = "";
-        startGame();
-    }, 1000);
+    if (document.querySelector(".username input").value.trim().replace(" ", "").length > 2 && document.querySelector(".username input").value.trim().replace(" ", "").length <= 15) {
+        BTN_PLAY.removeEventListener("mouseleave", stopAnimation);
+        SPACESHIP1.style.visibility = "visible";
+        const YCOORD = ((window.innerHeight / 2) - (document.querySelectorAll("ul img")[0].offsetHeight / 2)) - parseFloat(SPACESHIP1.style.top.replace('px', ''));
+        const XCOORD = (window.innerWidth / 2) + (document.querySelectorAll("ul img")[0].offsetWidth / 2);
+        SPACESHIP1.style.transform = "translateX(" + XCOORD + "px) translateY(" + YCOORD + "px) rotate(0deg)";
+        document.querySelector(".menu").style.display = "none";
+    
+        setTimeout(function () {
+            SPACESHIP1.style.display = "none";
+            SPACESHIP1.style.visibility = "hidden";
+            SPACESHIP1.style.transform = "";
+            startGame();
+        }, 1000);
+    } else {
+        alert("Introduza um nome válido!");
+    }
 });
 
 BTN_LEADERBOARD.addEventListener("mouseover", function (e) {

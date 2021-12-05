@@ -45,13 +45,6 @@
   animation: 5s cresent linear infinite alternate;
 }
 
-/* @media (max-width: 768px) {
-  .moon {
-    width: 160px;
-    height: 160px;
-  }
-} */
-
 @keyframes spin {
   from {
     transform: translate(0%, 0%);
