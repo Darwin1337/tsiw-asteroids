@@ -64,3 +64,14 @@
   transform: translateY(-50%);
   z-index: -1;
 }
+
+.floating-intro { 
+  animation: floating 5s ease-in-out infinite
+}
+
+@keyframes floating {
+  0% { transform: translate(0,  0px) rotate(-5deg); }
+  33%  { transform: translate(0, -35px) rotate(-3deg); }
+  66%   { transform: translate(0, 25px) rotate(3deg); }
+  100%   { transform: translate(0, -0px) rotate(-5deg); }    
+}
