@@ -3,7 +3,7 @@
 // http://www.classicgaming.cc/classics/asteroids/play-guide
 // https://games.aarp.org/games/atari-asteroids
 // https://youtu.be/WYSupJ5r2zo
-// Foram apenas alterados alguns valores que, após as nossas simplificações, afetariam o jogo ao utilizador.
+// Foram apenas alterados alguns valores que, após as nossas simplificações, afetariam o jogo ao utilizador
 
 const canvas = document.querySelector("canvas");
 canvas.width = window.innerWidth - 20;
@@ -23,7 +23,8 @@ const ASTEROID_LEVELS = [
 
 // TO DO
 // Animação da introdução (aperfeiçoar);
-// Resolver problema de alguns elementos SVG não funcionarem em certos browsers.
+
+let isSoundMuted = true;
 
 // Variável que irá conter o objeto da nave
 let spaceship = null;
@@ -180,6 +181,14 @@ class Asteroid {
                     asteroids.push(new Asteroid(this.x - 2, this.y - 2, this.level + 1));
                 }
 
+                // Tocar o efeito sonoro do asteroid a explodir
+                if (!isSoundMuted) {
+                    const AST_EXPLOSION = document.querySelector("#AsteroidExplosion");
+                    AST_EXPLOSION.volume = 0.05;
+                    AST_EXPLOSION.currentTime = 0;
+                    AST_EXPLOSION.play();
+                }
+
                 // Remover a bala que atingiu o asteróide
                 bullets.splice(i, 1);
 
@@ -238,6 +247,13 @@ class Asteroid {
 
                 // Se entrar aqui, o jogador destruiu todos os asteróides e passou de nível
                 if (asteroids.length == 0 && !spaceship.isExploding) {
+                    // Tocar o efeito sonoro da passagem de ronda
+                    if (!isSoundMuted) {
+                        const ROUND_PASS = document.querySelector("#RoundPass");
+                        ROUND_PASS.volume = 0.05;
+                        ROUND_PASS.currentTime = 0;
+                        ROUND_PASS.play();
+                    }
                     gameStats.round += 1;
                     document.querySelector(".current-round .text").innerHTML = gameStats.round;
 
@@ -255,6 +271,14 @@ class Asteroid {
                 }
                 // Verificar se o utiliador ganhou pontos suficientes para ganhar a vida extra
                 if (gameStats.lives < MAX_LIVES && gameStats.score >= spaceship.lastExtraLife + POINTS_BETWEEN_LIVES){
+                    // Tocar o efeito sonoro da vida ganha
+                    if (!isSoundMuted) {
+                        const LIFE_WON_SFX = document.querySelector("#LifeGain");
+                        LIFE_WON_SFX.volume = 0.05;
+                        LIFE_WON_SFX.currentTime = 0;
+                        LIFE_WON_SFX.play();
+                    }
+
                     spaceship.lastExtraLife += POINTS_BETWEEN_LIVES;
                     gameStats.lives += 1;
 
@@ -265,6 +289,8 @@ class Asteroid {
                     for (let j = 0; j < MAX_LIVES - gameStats.lives; j++) {
                         document.querySelector(".lives").innerHTML += '<img src="img/heart_gray.png" style="width: 40px;">\n';
                     }
+                } else if (gameStats.lives == MAX_LIVES && gameStats.score >= spaceship.lastExtraLife + POINTS_BETWEEN_LIVES) {
+                    spaceship.lastExtraLife += POINTS_BETWEEN_LIVES;
                 }
 
                 // Apesar de removermos o atual asteróide ele continua a executar o resto da função
@@ -378,6 +404,14 @@ class Spaceship {
 
                     // Se o utilizador não tiver mais vidas, mostrar ecrã de game over
                     if (gameStats.lives < 1) {
+                        // Tocar o efeito sonoro do game over
+                        if (!isSoundMuted) {
+                            const GAME_OVER_SFX = document.querySelector("#GameOver");
+                            GAME_OVER_SFX.volume = 0.1;
+                            GAME_OVER_SFX.currentTime = 0;
+                            GAME_OVER_SFX.play();
+                        }
+
                         // Mostrar imagem de uma explosão por cima da nave
                         ctx.drawImage(imgExplosion, this.getCenter("x") - 30, this.getCenter("y") - 30, 60, 60);
 
@@ -391,6 +425,14 @@ class Spaceship {
 
                         // Mostrar imagem de uma explosão por cima da nave
                         ctx.drawImage(imgExplosion, this.getCenter("x") - 30, this.getCenter("y") - 30, 60, 60);
+
+                        // Tocar o efeito sonoro da explosão da nave
+                        if (!isSoundMuted) {
+                            const SPACESHIP_EXPLOSION_SFX = document.querySelector("#ShipExplosion");
+                            SPACESHIP_EXPLOSION_SFX.volume = 0.05;
+                            SPACESHIP_EXPLOSION_SFX.currentTime = 0;
+                            SPACESHIP_EXPLOSION_SFX.play();
+                        }
 
                         // Impedir o utilizador de controlar a nave
                         enableControls = false;
@@ -413,6 +455,7 @@ class Spaceship {
             if (new Date().getTime() - this.explosionTime.getTime() >= 1000) {
                 this.isRespawning = true;
 
+                // Verificar se não há nenhum obstáculo no centro do ecrã para permitir a nave spawnar
                 let isSpawnDoable = true;
                 for (let i = 0; i < asteroids.length; i++) {
                     if (areObjectsColliding(asteroids[i].x + (asteroids[i].width / 2), asteroids[i].y + (asteroids[i].height / 2), W / 2, H / 2, asteroids[i].width / 2, this.width * 4)) {
@@ -518,7 +561,15 @@ window.addEventListener("keyup", event => {
 
 function handleSpaceshipControls() {
     if (enableControls) {
+        const THRUST_SFX = document.querySelector("#ThrustSound");
         if (keys["ArrowUp"]) {
+            // Tocar o efeito sonoro do movimento da nave
+            if (!isSoundMuted && (THRUST_SFX.currentTime >= THRUST_SFX.duration - 0.15 || THRUST_SFX.currentTime == 0)) {
+                THRUST_SFX.volume = 0.05;
+                THRUST_SFX.currentTime = 0;
+                THRUST_SFX.play();
+            }
+
             // Quando a nave se mover, alterar o source do SVG para ser mostrado o fogo
             if (imgSpaceship.src != "img/spaceship_fire.svg") {
                 imgSpaceship.src = "img/spaceship_fire.svg";
@@ -529,6 +580,12 @@ function handleSpaceshipControls() {
                 spaceship.curAccel += 0.02;
             }
         } else {
+            // Parar o efeito sonoro
+            if (!isSoundMuted) {
+                THRUST_SFX.currentTime = 0;
+                THRUST_SFX.pause();
+            }
+
             // Quando a nave estiver parada, alterar o source do SVG para não ser mostrado o fogo
             if (imgSpaceship.src != "img/spaceship.svg") {
                 imgSpaceship.src = "img/spaceship.svg";
@@ -556,6 +613,13 @@ function handleSpaceshipControls() {
             // Se a última bala tiver sido disparada há mais de X milissegudos atrás e existirem menos do máximo no ecrã, permitir novo disparo
             const LAST_BULLET = bullets[bullets.length - 1];
             if ((bullets.length < BULLETS_ALLOWED) && (bullets.length == 0 || new Date().getTime() - LAST_BULLET.date.getTime() >= LAST_BULLET.delay)) {
+                // Tocar o efeito sonoro da bala a ser disparada
+                if (!isSoundMuted) {
+                    const BULLET_SFX = document.querySelector("#LaserShoot");
+                    BULLET_SFX.volume = 0.02;
+                    BULLET_SFX.currentTime = 0;
+                    BULLET_SFX.play();
+                }
                 bullets.push(new Bullet());
             }
         }
@@ -571,6 +635,13 @@ function handleSpaceshipControls() {
                 }
             } else {
                 spaceship.countHyperspace = 1;
+            }
+            // Tocar o efeito sonoro do teleport
+            if (!isSoundMuted) {
+                const TELEPORT_SFX = document.querySelector("#Teleport");
+                TELEPORT_SFX.volume = 0.05;
+                TELEPORT_SFX.currentTime = 0;
+                TELEPORT_SFX.play();
             }
             spaceship.x = Math.floor(Math.random() * ((W - spaceship.width) - 0 + 1) + 0);
             spaceship.y = Math.floor(Math.random() * ((H - spaceship.height) - 0 + 1) + 0);
@@ -677,7 +748,6 @@ function startGame() {
 
     // Criar instâncias dos asteróides
     for (let i = 0; i < quantAsteroids; i++) {
-        // Verificar se o asteróide não nasce em cima da nave
         asteroids.push(new Asteroid(0, 0, 1));
     }
 
@@ -696,7 +766,8 @@ setTimeout(function () {
 }, 5000);
 
 function unmute() {
-    const AUDIO = document.querySelector("#menu-hover");
+    isSoundMuted = false;
+    const AUDIO = document.querySelector("#MenuHover");
     AUDIO.volume = 0.05;
     document.querySelector(".pop-up").style.display = "none";
 
