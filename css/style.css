@@ -299,10 +299,17 @@ button {
   border-image: linear-gradient(to right, #11998e, #74FAC8);
   border-image-slice: 1;
 }
+
 .username input:focus ~ label {
   position: absolute;
   top: -20px;
   transition: 0.3s;
   font-size: 1.25em;
   color: #74FAC8;
+}
+
+.floating-asteroids {
+  width: 100%;
+  height: 100%;
+  position: absolute;
 }

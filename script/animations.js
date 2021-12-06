@@ -5,6 +5,20 @@ const SPACESHIP1 = document.querySelector("#nave-play");
 const SPACESHIP2 = document.querySelector("#nave-leaderboard");
 const SPACESHIP3 = document.querySelector("#nave-quit");
 
+// Animação dos asteróides
+animateAsteroids()
+animationInterval = setInterval(function(){ animateAsteroids() }, 1000);
+
+function animateAsteroids() {
+    // Animação dos asteróides que aparecem na introdução
+    document.querySelectorAll(".floating-asteroids img").forEach(asteroid => {
+        // Obter coordenadas aleatórias para posteriormente ser aplicado o translate
+        const coordX = Math.floor(Math.random() * ((document.querySelector("body").offsetWidth - 150) - 0 + 1) + 0);
+        const coordY = Math.floor(Math.random() * ((document.querySelector("body").offsetHeight - 150) - 0 + 1) + 0);
+        asteroid.style.transform = "translateX(" + coordX + "px) translateY(" + coordY + "px)";
+    });
+}
+
 // Animações da nave no menu principal
 BTN_PLAY.addEventListener("mouseover", function (e) {
     SPACESHIP1.style.display = "block";

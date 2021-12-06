@@ -6,6 +6,11 @@
     visibility: hidden;
 }
 
+.floating-asteroids img {
+  transition: transform, visibility;
+  transition-duration: 1s;
+}
+
 #nave-play {
     top: 0;
     left: -50px;

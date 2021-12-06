@@ -21,9 +21,7 @@ const ASTEROID_LEVELS = [
     { level: 3, width: 75, height: 75, points: 200, img: "img/asteroid3.svg" }
 ];
 
-// TO DO
-// Animação da introdução (aperfeiçoar);
-
+// Variável que irá controlar a reprodução do áudio de acordo com a escolha do utilizador
 let isSoundMuted = true;
 
 // Variável que irá conter o objeto da nave
@@ -762,7 +760,6 @@ setTimeout(function () {
     document.querySelector(".intro").style.display = "none";
     document.querySelector(".menu").style.display = "flex";
     document.querySelector(".pop-up").style.display = "flex";
-    // startGame();
 }, 5000);
 
 function unmute() {
